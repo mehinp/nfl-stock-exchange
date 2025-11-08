@@ -1,37 +1,29 @@
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { fetchPortfolio, fetchPortfolioStats, fetchTransactions, executeTrade } from '@/lib/api';
-import { queryClient } from '@/lib/queryClient';
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { executeTrade, fetchPortfolio } from "@/lib/api";
+import { queryClient } from "@/lib/queryClient";
 
 export function usePortfolio() {
   return useQuery({
-    queryKey: ['/api/portfolio'],
+    queryKey: ["portfolio"],
     queryFn: fetchPortfolio,
   });
 }
 
-export function usePortfolioStats() {
-  return useQuery({
-    queryKey: ['/api/portfolio/stats'],
-    queryFn: fetchPortfolioStats,
-  });
-}
-
-export function useTransactions() {
-  return useQuery({
-    queryKey: ['/api/transactions'],
-    queryFn: fetchTransactions,
-  });
-}
+type TradeInput = {
+  action: "buy" | "sell";
+  teamName: string;
+  quantity: number;
+};
 
 export function useTrade() {
   return useMutation({
-    mutationFn: executeTrade,
+    mutationFn: ({ action, teamName, quantity }: TradeInput) =>
+      executeTrade(action, {
+        team_name: teamName,
+        quantity,
+      }),
     onSuccess: () => {
-      // Invalidate and refetch portfolio data after successful trade
-      queryClient.invalidateQueries({ queryKey: ['/api/portfolio'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/portfolio/stats'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/teams'] });
+      queryClient.invalidateQueries({ queryKey: ["portfolio"] });
     },
   });
 }

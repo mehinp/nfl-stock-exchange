@@ -5,6 +5,7 @@ import { formatCurrency } from "@/lib/number-format";
 interface PortfolioStatsProps {
   totalValue: number;
   totalCost: number;
+  initialDeposit: number;
   dayChange: number;
   dayChangePercent: number;
 }
@@ -12,13 +13,28 @@ interface PortfolioStatsProps {
 export default function PortfolioStats({
   totalValue,
   totalCost,
+  initialDeposit,
   dayChange,
   dayChangePercent,
 }: PortfolioStatsProps) {
-  const totalProfitLoss = totalValue - totalCost;
-  const totalProfitLossPercent = (totalProfitLoss / totalCost) * 100;
+  const safeTotalCost = totalCost > 0 ? totalCost : 0;
+  const safeInitialDeposit = initialDeposit > 0 ? initialDeposit : 0;
+  const totalProfitLoss = totalValue - safeInitialDeposit;
+  const totalProfitLossPercent =
+    safeInitialDeposit > 0 ? (totalProfitLoss / safeInitialDeposit) * 100 : 0;
+  const normalizedDayChangePercent = Number.isFinite(dayChangePercent)
+    ? dayChangePercent
+    : 0;
 
-  const cards = [
+  type CardConfig = {
+    icon: typeof DollarSign;
+    label: string;
+    value: string;
+    subtitle: string;
+    percentIntent?: "positive" | "negative";
+  };
+
+  const cards: CardConfig[] = [
     {
       icon: DollarSign,
       label: "Total Value",
@@ -28,7 +44,7 @@ export default function PortfolioStats({
     {
       icon: BarChart3,
       label: "Total Cost",
-      value: formatCurrency(totalCost),
+      value: formatCurrency(safeTotalCost),
       subtitle: "Capital deployed",
     },
     {
@@ -42,7 +58,7 @@ export default function PortfolioStats({
       icon: Target,
       label: "Day Change",
       value: `${dayChange >= 0 ? "+" : "-"}${formatCurrency(Math.abs(dayChange))}`,
-      subtitle: `${dayChangePercent >= 0 ? "+" : "-"}${Math.abs(dayChangePercent).toFixed(2)}%`,
+      subtitle: `${normalizedDayChangePercent >= 0 ? "+" : "-"}${Math.abs(normalizedDayChangePercent).toFixed(2)}%`,
       percentIntent: dayChange >= 0 ? "positive" : "negative",
     },
   ] as const;

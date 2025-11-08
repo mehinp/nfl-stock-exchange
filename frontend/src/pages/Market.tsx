@@ -22,6 +22,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import TeamLogo from "@/components/shared/TeamLogo";
 import { formatCurrency, formatNumber, formatRange } from "@/lib/number-format";
+import { useTrade } from "@/hooks/usePortfolio";
+import { useToast } from "@/hooks/use-toast";
 
 type RangeStats = { low: number; high: number };
 
@@ -41,7 +43,7 @@ type NormalizedTeam = {
   monthRange?: RangeStats | null;
 };
 
-const PRICE_MULTIPLIER = 2.5;
+const PRICE_MULTIPLIER = 1;
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 const MONTH_MS = WEEK_MS * 4;
 
@@ -65,6 +67,9 @@ export default function Market() {
   const [chartRange, setChartRange] = useState<ChartRange>("1W");
   const [orderType, setOrderType] = useState<"buy" | "sell">("buy");
   const [quantity, setQuantity] = useState(1);
+  const [pendingAction, setPendingAction] = useState<"buy" | "sell" | null>(null);
+  const tradeMutation = useTrade();
+  const { toast } = useToast();
 
   const normalizedTeams = useMemo<NormalizedTeam[]>(() => {
     if (!teams) return [];
@@ -255,6 +260,40 @@ export default function Market() {
     setQuantity(Math.max(1, Number.isFinite(value) ? value : 1));
   };
 
+  const handleTradeSubmit = (action: "buy" | "sell") => {
+    if (!selectedTeam) return;
+    const teamName = selectedTeam.name;
+    const toastLabel = selectedTeam.name;
+    const currentQuantity = quantity;
+
+    setPendingAction(action);
+    tradeMutation.mutate(
+      {
+        action,
+        teamName,
+        quantity: currentQuantity,
+      },
+      {
+        onSuccess: (data) => {
+          toast({
+            title: "Trade executed",
+            description: `${action === "buy" ? "Bought" : "Sold"} ${currentQuantity} ${currentQuantity === 1 ? "share" : "shares"} of ${toastLabel} @ $${Number(data.price).toFixed(2)}`,
+          });
+        },
+        onError: (err: unknown) => {
+          toast({
+            title: "Trade failed",
+            description: err instanceof Error ? err.message : "Unable to complete trade.",
+            variant: "destructive",
+          });
+        },
+        onSettled: () => {
+          setPendingAction(null);
+        },
+      },
+    );
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -367,14 +406,12 @@ export default function Market() {
                       type="buy"
                       quantity={quantity}
                       onQuantityChange={handleQuantityChange}
-                      onSubmit={() => {
-                        if (!selectedTeam) return;
-                        console.log("buy", quantity, selectedTeam.name);
-                      }}
+                      onSubmit={() => handleTradeSubmit("buy")}
                       totalLabel={formatCurrency(
                         selectedTeam ? selectedTeam.price * quantity : 0,
                       )}
                       disabled={!selectedTeam}
+                      isSubmitting={pendingAction === "buy" && tradeMutation.isPending}
                     />
                   </TabsContent>
                   <TabsContent value="sell">
@@ -382,14 +419,12 @@ export default function Market() {
                       type="sell"
                       quantity={quantity}
                       onQuantityChange={handleQuantityChange}
-                      onSubmit={() => {
-                        if (!selectedTeam) return;
-                        console.log("sell", quantity, selectedTeam.name);
-                      }}
+                      onSubmit={() => handleTradeSubmit("sell")}
                       totalLabel={formatCurrency(
                         selectedTeam ? selectedTeam.price * quantity : 0,
                       )}
                       disabled={!selectedTeam}
+                      isSubmitting={pendingAction === "sell" && tradeMutation.isPending}
                     />
                   </TabsContent>
                 </Tabs>
@@ -510,6 +545,7 @@ interface OrderFormProps {
   onSubmit: () => void;
   totalLabel: string;
   disabled?: boolean;
+  isSubmitting?: boolean;
 }
 
 function OrderForm({
@@ -519,6 +555,7 @@ function OrderForm({
   onSubmit,
   totalLabel,
   disabled,
+  isSubmitting,
 }: OrderFormProps) {
   return (
     <form
@@ -548,8 +585,12 @@ function OrderForm({
         </div>
       </div>
 
-      <Button type="submit" className="w-full" disabled={disabled}>
-        {type === "buy" ? "Place Buy Order" : "Place Sell Order"}
+      <Button type="submit" className="w-full" disabled={disabled || isSubmitting}>
+        {isSubmitting
+          ? "Submitting..."
+          : type === "buy"
+            ? "Place Buy Order"
+            : "Place Sell Order"}
       </Button>
     </form>
   );

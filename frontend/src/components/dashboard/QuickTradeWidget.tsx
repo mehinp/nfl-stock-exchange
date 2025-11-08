@@ -12,6 +12,8 @@ import {
 import { useState } from "react";
 import { Minus, Plus } from "lucide-react";
 import { formatCurrency, formatNumber } from "@/lib/number-format";
+import { useTrade } from "@/hooks/usePortfolio";
+import { useToast } from "@/hooks/use-toast";
 
 interface Team {
   id: string;
@@ -28,12 +30,40 @@ export default function QuickTradeWidget({ teams }: QuickTradeWidgetProps) {
   const [selectedTeam, setSelectedTeam] = useState<string>("");
   const [quantity, setQuantity] = useState(1);
   const [tradeType, setTradeType] = useState<"buy" | "sell">("buy");
+  const tradeMutation = useTrade();
+  const { toast } = useToast();
 
   const selectedTeamData = teams.find(t => t.id === selectedTeam);
   const totalCost = selectedTeamData ? selectedTeamData.price * quantity : 0;
 
   const handleTrade = () => {
-    console.log(`${tradeType} ${quantity} shares of ${selectedTeamData?.name}`);
+    if (!selectedTeamData) return;
+    const teamName = selectedTeamData.name;
+    const teamAbbrev = selectedTeamData.abbreviation;
+    const currentQuantity = quantity;
+    tradeMutation.mutate(
+      {
+        action: tradeType,
+        teamName,
+        quantity: currentQuantity,
+      },
+      {
+        onSuccess: (data) => {
+          setQuantity(1);
+          toast({
+            title: "Trade executed",
+            description: `${tradeType === "buy" ? "Bought" : "Sold"} ${currentQuantity} ${currentQuantity === 1 ? "share" : "shares"} of ${teamName} @ $${Number(data.price).toFixed(2)}`,
+          });
+        },
+        onError: (error) => {
+          toast({
+            title: "Trade failed",
+            description: error instanceof Error ? error.message : "Unable to complete trade.",
+            variant: "destructive",
+          });
+        },
+      },
+    );
   };
 
   return (
@@ -129,10 +159,12 @@ export default function QuickTradeWidget({ teams }: QuickTradeWidgetProps) {
         <Button
           className="w-full h-12"
           onClick={handleTrade}
-          disabled={!selectedTeam}
+          disabled={!selectedTeam || tradeMutation.isPending}
           data-testid="button-execute-trade"
         >
-          {tradeType === "buy" ? "Buy" : "Sell"} {selectedTeamData?.abbreviation || "Team"}
+          {tradeMutation.isPending
+            ? "Submitting..."
+            : `${tradeType === "buy" ? "Buy" : "Sell"} ${selectedTeamData?.abbreviation || "Team"}`}
         </Button>
       </div>
     </Card>

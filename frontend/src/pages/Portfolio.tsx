@@ -1,57 +1,69 @@
+import { useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import StockHoldingCard from "@/components/portfolio/StockHoldingCard";
 import PerformanceChart from "@/components/portfolio/PerformanceChart";
 import TransactionHistory from "@/components/portfolio/TransactionHistory";
 import PortfolioStats from "@/components/portfolio/PortfolioStats";
 import { useMarketNavigation } from "@/hooks/useMarketNavigation";
-
-// TODO: remove mock data
-const mockHoldings = [
-  { team: { name: 'Kansas City Chiefs', abbreviation: 'KC' }, shares: 10, avgCost: 135.20, currentPrice: 145.50 },
-  { team: { name: 'San Francisco 49ers', abbreviation: 'SF' }, shares: 8, avgCost: 130.00, currentPrice: 138.75 },
-  { team: { name: 'Buffalo Bills', abbreviation: 'BUF' }, shares: 12, avgCost: 120.50, currentPrice: 125.90 },
-  { team: { name: 'Miami Dolphins', abbreviation: 'MIA' }, shares: 5, avgCost: 125.00, currentPrice: 118.20 },
-];
-
-const mockPerformanceData = [
-  { date: 'Mon', value: 10000 },
-  { date: 'Tue', value: 10500 },
-  { date: 'Wed', value: 10200 },
-  { date: 'Thu', value: 11000 },
-  { date: 'Fri', value: 11500 },
-  { date: 'Sat', value: 12000 },
-  { date: 'Sun', value: 12543 },
-];
-
-const mockTransactions = [
-  {
-    id: '1',
-    date: '2025-11-08',
-    type: 'buy' as const,
-    team: { name: 'Kansas City Chiefs', abbreviation: 'KC' },
-    shares: 5,
-    price: 145.50,
-  },
-  {
-    id: '2',
-    date: '2025-11-07',
-    type: 'sell' as const,
-    team: { name: 'New England Patriots', abbreviation: 'NE' },
-    shares: 3,
-    price: 102.50,
-  },
-  {
-    id: '3',
-    date: '2025-11-06',
-    type: 'buy' as const,
-    team: { name: 'Baltimore Ravens', abbreviation: 'BAL' },
-    shares: 8,
-    price: 132.40,
-  },
-];
+import { usePortfolio, useTrade } from "@/hooks/usePortfolio";
+import { useTeams } from "@/hooks/useTeams";
+import { buildPortfolioSnapshot, type EnrichedHolding } from "@/lib/portfolio-utils";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Portfolio() {
   const navigateToMarket = useMarketNavigation();
+  const { data: portfolioData, isLoading: isPortfolioLoading } = usePortfolio();
+  const { data: teams, isLoading: isTeamsLoading } = useTeams();
+  const tradeMutation = useTrade();
+  const { toast } = useToast();
+
+  const snapshot = useMemo(
+    () => buildPortfolioSnapshot(portfolioData, teams),
+    [portfolioData, teams],
+  );
+
+  const chartData =
+    snapshot.chartPoints.length > 0
+      ? snapshot.chartPoints
+      : [
+          {
+            date: new Date().toISOString(),
+            value: snapshot.totalValue,
+          },
+        ];
+
+  const holdingsLoading = isPortfolioLoading || isTeamsLoading;
+
+  const handleSellHolding = (holding: EnrichedHolding) => {
+    if (!holding.quantity || tradeMutation.isPending) return;
+
+    const quantityToSell = holding.quantity;
+    tradeMutation.mutate(
+      {
+        action: "sell",
+        teamName: holding.team.name,
+        quantity: quantityToSell,
+      },
+      {
+        onSuccess: (data) => {
+          toast({
+            title: "Sell order completed",
+            description: `Sold ${quantityToSell} ${quantityToSell === 1 ? "share" : "shares"} of ${holding.team.name} @ $${Number(
+              data.price,
+            ).toFixed(2)}`,
+          });
+        },
+        onError: (error) => {
+          toast({
+            title: "Sell order failed",
+            description: error instanceof Error ? error.message : "Unable to complete trade.",
+            variant: "destructive",
+          });
+        },
+      },
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -65,33 +77,56 @@ export default function Portfolio() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
-              <PerformanceChart data={mockPerformanceData} />
-              
+              {holdingsLoading ? (
+                <Skeleton className="h-[360px] w-full" />
+              ) : (
+                <PerformanceChart data={chartData} />
+              )}
+
               <div>
                 <h2 className="text-xl font-semibold mb-4">Your Holdings</h2>
-                <div className="grid grid-cols-1 gap-4">
-                  {mockHoldings.map((holding, index) => (
-                    <StockHoldingCard
-                      key={index}
-                      {...holding}
-                      onSell={() => console.log(`Sell ${holding.team.name}`)}
-                      onSelectTeam={navigateToMarket}
-                    />
-                  ))}
-                </div>
+                {holdingsLoading ? (
+                  <div className="space-y-3">
+                    <Skeleton className="h-32 w-full" />
+                    <Skeleton className="h-32 w-full" />
+                  </div>
+                ) : snapshot.holdings.length ? (
+                  <div className="grid grid-cols-1 gap-4">
+                    {snapshot.holdings.map((holding) => (
+                      <StockHoldingCard
+                        key={holding.id}
+                        team={holding.team}
+                        shares={holding.quantity}
+                        avgCost={holding.avgCost}
+                        currentPrice={holding.currentPrice}
+                        onSell={() => handleSellHolding(holding)}
+                        onSelectTeam={navigateToMarket}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    You don&apos;t hold any teams yet. Start trading to build your portfolio.
+                  </p>
+                )}
               </div>
             </div>
 
             <div className="space-y-6">
-              <PortfolioStats
-                totalValue={12543.20}
-                totalCost={11200.50}
-                dayChange={432.10}
-                dayChangePercent={3.56}
-              />
-              
+              {holdingsLoading ? (
+                <Skeleton className="h-64 w-full" />
+              ) : (
+                <PortfolioStats
+                  totalValue={snapshot.totalValue}
+                  totalCost={snapshot.totalCost}
+                  initialDeposit={snapshot.initialDeposit}
+                  dayChange={snapshot.dayChangeValue}
+                  dayChangePercent={snapshot.dayChangePercent}
+                />
+              )}
+
               <TransactionHistory
-                transactions={mockTransactions}
+                transactions={snapshot.transactions}
                 onSelectTeam={navigateToMarket}
               />
             </div>

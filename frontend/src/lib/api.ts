@@ -52,15 +52,19 @@ export const authSession = {
 };
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const headers: HeadersInit = {
+  const headers = new Headers({
     Accept: "application/json",
     "ngrok-skip-browser-warning": "true",
-    ...(init?.headers ?? {}),
-  };
+  });
+
+  if (init?.headers) {
+    const initialHeaders = new Headers(init.headers);
+    initialHeaders.forEach((value, key) => headers.set(key, value));
+  }
 
   const token = authSession.getToken();
   if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
+    headers.set("X-Auth-Header", token);
   }
 
   const response = await fetch(buildUrl(path), {
@@ -167,19 +171,55 @@ export async function fetchFlashPicks() {
   throw new Error("Flash picks endpoint not implemented on the public API");
 }
 
-export async function fetchPortfolio() {
-  throw new Error("Portfolio endpoint not implemented on the public API");
+type TradeAction = "buy" | "sell";
+
+export interface TradePayload {
+  team_name: string;
+  quantity: number;
 }
 
-export async function fetchPortfolioStats() {
-  throw new Error("Portfolio stats endpoint not implemented on the public API");
+export interface TradeResponse {
+  success: boolean;
+  team_name: string;
+  quantity: number;
+  price: string;
+  balance: string;
 }
 
-export async function fetchTransactions() {
-  throw new Error("Transactions endpoint not implemented on the public API");
+export function executeTrade(action: TradeAction, payload: TradePayload) {
+  return request<TradeResponse>(`/trades/${action}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
 }
 
-export async function executeTrade() {
-  throw new Error("Trading endpoint not implemented on the public API");
+export interface PortfolioPosition {
+  team_name: string;
+  quantity: number;
+  avg_price: string;
+  last_transaction: string;
+}
+
+export interface PortfolioTrade {
+  id: string;
+  team_name: string;
+  action: "buy" | "sell";
+  quantity: number;
+  price: string;
+  timestamp: string;
+}
+
+export interface PortfolioResponse {
+  balance: string;
+  initial_deposit?: string;
+  positions: PortfolioPosition[];
+  trades?: PortfolioTrade[];
+}
+
+export function fetchPortfolio() {
+  return request<PortfolioResponse>("/trades/portfolio");
 }
 

@@ -4,49 +4,16 @@ import PortfolioSummary from "@/components/dashboard/PortfolioSummary";
 import TrendingTeams from "@/components/dashboard/TrendingTeams";
 import QuickTradeWidget from "@/components/dashboard/QuickTradeWidget";
 import PortfolioInsights from "@/components/dashboard/PortfolioInsights";
-import { formatCurrency } from "@/lib/number-format";
+import { formatCurrency, formatPercent } from "@/lib/number-format";
 import { useTeams } from "@/hooks/useTeams";
 import { useMarketNavigation } from "@/hooks/useMarketNavigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getTeamAbbreviation } from "@/lib/utils";
 import type { TeamMarketInformation } from "@/lib/api";
+import { usePortfolio } from "@/hooks/usePortfolio";
+import { buildPortfolioSnapshot } from "@/lib/portfolio-utils";
 
-// TODO: remove mock data
-const mockTradeTeams = [
-  { id: "1", name: "Kansas City Chiefs", abbreviation: "KC", price: 145.5 },
-  { id: "2", name: "San Francisco 49ers", abbreviation: "SF", price: 138.75 },
-  { id: "3", name: "Baltimore Ravens", abbreviation: "BAL", price: 132.4 },
-  { id: "4", name: "Buffalo Bills", abbreviation: "BUF", price: 125.9 },
-  { id: "5", name: "Miami Dolphins", abbreviation: "MIA", price: 118.2 },
-];
-
-const insightHighlights = [
-  {
-    label: "Overall Return",
-    value: formatCurrency(1843.32),
-    description: "Unrealized P&L this month",
-    trend: 12.4,
-  },
-  {
-    label: "Best Performer",
-    value: "KC +8.4%",
-    description: "1W vs league average",
-    trend: 1.8,
-  },
-  {
-    label: "Cash Ready",
-    value: formatCurrency(5400),
-    description: "Available to deploy",
-  },
-];
-
-const allocationInsights = [
-  { label: "AFC Contenders", percentage: 52 },
-  { label: "NFC Contenders", percentage: 35 },
-  { label: "High Upside Plays", percentage: 13 },
-];
-
-const PRICE_MULTIPLIER = 2.5;
+const PRICE_MULTIPLIER = 1;
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 const toNumber = (value: unknown, fallback = 0) => {
@@ -124,11 +91,14 @@ const normalizeTeams = (teams: TeamMarketInformation[]): NormalizedTeam[] => {
 
 export default function Dashboard() {
   const { data: teams, isLoading: isTeamsLoading } = useTeams();
+  const { data: portfolioData, isLoading: isPortfolioLoading } = usePortfolio();
   const navigateToMarket = useMarketNavigation();
 
+  const normalizedTeams = useMemo(() => (teams ? normalizeTeams(teams) : []), [teams]);
+
   const trendingTeams = useMemo(() => {
-    if (!teams) return [];
-    return normalizeTeams(teams)
+    if (!normalizedTeams.length) return [];
+    return normalizedTeams
       .sort(
         (a, b) =>
           Math.abs(b.weekChangePercent ?? 0) - Math.abs(a.weekChangePercent ?? 0),
@@ -141,7 +111,93 @@ export default function Dashboard() {
         price: team.price,
         changePercent: team.weekChangePercent ?? 0,
       }));
-  }, [teams]);
+  }, [normalizedTeams]);
+
+  const quickTradeTeams = useMemo(
+    () =>
+      normalizedTeams.map((team) => ({
+        id: team.name,
+        name: team.name,
+        abbreviation: team.abbreviation,
+        price: team.price,
+      })),
+    [normalizedTeams],
+  );
+
+  const portfolioSnapshot = useMemo(
+    () => buildPortfolioSnapshot(portfolioData, teams),
+    [portfolioData, teams],
+  );
+
+  const portfolioInsights = useMemo(() => {
+    const totalValue = portfolioSnapshot.totalValue;
+
+    const sortedByDayChange = [...portfolioSnapshot.holdings].sort(
+      (a, b) => (b.dayChangePercent ?? 0) - (a.dayChangePercent ?? 0),
+    );
+    const bestPerformer = sortedByDayChange[0];
+    const worstPerformer = sortedByDayChange[sortedByDayChange.length - 1];
+
+    const highlights = [
+      {
+        label: "Best Performer",
+        value: bestPerformer
+          ? `${bestPerformer.team.abbreviation} ${formatPercent(bestPerformer.dayChangePercent)}`
+          : "—",
+        description: bestPerformer
+          ? `${bestPerformer.quantity} shares • ${formatCurrency(bestPerformer.currentPrice)}`
+          : "Start trading to track performance",
+        trend: bestPerformer?.dayChangePercent,
+      },
+      {
+        label: "Worst Performer",
+        value: worstPerformer
+          ? `${worstPerformer.team.abbreviation} ${formatPercent(worstPerformer.dayChangePercent)}`
+          : "—",
+        description: worstPerformer
+          ? `${worstPerformer.quantity} shares • ${formatCurrency(worstPerformer.currentPrice)}`
+          : "All positions flat",
+        trend: worstPerformer?.dayChangePercent,
+      },
+    ];
+
+    const totalAllocBase = portfolioSnapshot.totalValue || 0;
+    let allocations =
+      totalAllocBase > 0
+        ? portfolioSnapshot.holdings
+            .map((holding) => ({
+              label: holding.team.abbreviation || holding.team.name,
+              percentage: (holding.totalValue / totalAllocBase) * 100,
+            }))
+            .sort((a, b) => b.percentage - a.percentage)
+        : [];
+
+    if (allocations.length > 3) {
+      const others = allocations.slice(3).reduce((sum, entry) => sum + entry.percentage, 0);
+      allocations = allocations.slice(0, 3);
+      if (others > 0.5) {
+        allocations.push({ label: "Other", percentage: others });
+      }
+    }
+
+    if (totalAllocBase > 0 && portfolioSnapshot.cashBalance > 0) {
+      allocations.push({
+        label: "Cash",
+        percentage: (portfolioSnapshot.cashBalance / totalAllocBase) * 100,
+      });
+    }
+
+    if (!allocations.length && portfolioSnapshot.cashBalance > 0) {
+      allocations = [
+        {
+          label: "Cash",
+          percentage: 100,
+        },
+      ];
+    }
+
+    return { highlights, allocations };
+  }, [portfolioSnapshot]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -155,16 +211,24 @@ export default function Dashboard() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
-              <PortfolioSummary
-                totalValue={12543.2}
-                dayChange={432.1}
-                dayChangePercent={3.56}
-                cashBalance={5432.1}
-                holdingsCount={8}
-              />
+              {isPortfolioLoading && isTeamsLoading ? (
+                <Skeleton className="h-[220px] w-full" />
+              ) : (
+                <PortfolioSummary
+                  totalValue={portfolioSnapshot.totalValue}
+                  dayChange={portfolioSnapshot.dayChangeValue}
+                  dayChangePercent={portfolioSnapshot.dayChangePercent}
+                  cashBalance={portfolioSnapshot.cashBalance}
+                  holdingsCount={portfolioSnapshot.holdingsCount}
+                />
+              )}
             </div>
             <div>
-              <QuickTradeWidget teams={mockTradeTeams} />
+              {isTeamsLoading ? (
+                <Skeleton className="h-[340px] w-full" />
+              ) : (
+                <QuickTradeWidget teams={quickTradeTeams} />
+              )}
             </div>
           </div>
 
@@ -175,8 +239,8 @@ export default function Dashboard() {
               <TrendingTeams teams={trendingTeams} onTeamSelect={navigateToMarket} />
             )}
             <PortfolioInsights
-              highlights={insightHighlights}
-              allocations={allocationInsights}
+              highlights={portfolioInsights.highlights}
+              allocations={portfolioInsights.allocations}
             />
           </div>
         </div>

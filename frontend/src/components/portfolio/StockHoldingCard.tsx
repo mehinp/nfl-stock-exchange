@@ -27,12 +27,13 @@ export default function StockHoldingCard({
   const totalValue = shares * currentPrice;
   const totalCost = shares * avgCost;
   const profitLoss = totalValue - totalCost;
-  const profitLossPercent = ((profitLoss / totalCost) * 100);
+  const profitLossPercent = totalCost > 0 ? (profitLoss / totalCost) * 100 : 0;
   const formattedShares = formatNumber(shares, { maximumFractionDigits: 0 });
   const formattedAvgCost = formatCurrency(avgCost);
   const formattedCurrentPrice = formatCurrency(currentPrice);
   const formattedTotalValue = formatCurrency(totalValue);
   const formattedPnL = `${profitLoss >= 0 ? "+" : "-"}${formatCurrency(Math.abs(profitLoss))}`;
+  const canSell = shares > 0 && Boolean(onSell);
 
   return (
     <Card
@@ -52,6 +53,7 @@ export default function StockHoldingCard({
           <Button
             variant="outline"
             size="sm"
+            disabled={!canSell}
             onClick={(event) => {
               event.stopPropagation();
               onSell?.();

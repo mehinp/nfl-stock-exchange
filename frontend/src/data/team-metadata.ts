@@ -90,12 +90,14 @@ export function findTeamMetadata(name: string): TeamMetadata | undefined {
     return metadataMap.get(key);
   }
 
-  for (const [storedKey, team] of metadataMap) {
-    if (storedKey.length < 4) continue;
+  let matchedTeam: TeamMetadata | undefined;
+  metadataMap.forEach((team, storedKey) => {
+    if (matchedTeam) return;
+    if (storedKey.length < 4) return;
     if (key.includes(storedKey) || storedKey.includes(key)) {
-      return team;
+      matchedTeam = team;
     }
-  }
+  });
 
-  return undefined;
+  return matchedTeam;
 }
