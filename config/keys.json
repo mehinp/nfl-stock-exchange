@@ -1,0 +1,18 @@
+{
+  "reddit": {
+    "client_id": "srIeCnDMO3uBOhesd2UDNA",
+    "client_secret": "lxd1YjI8k5jsb2hjx5Wy0omgLKgBKg",
+    "user_agent": "nfl_swing_bot/1.0"
+  },
+  "twitter": {
+    "bearer_token": "",
+    "api_key": "",
+    "api_secret": ""
+  },
+  "odds_api": {
+    "api_key": "999c5cd08c09973785bb2f6d21061acf"
+  },
+  "espn": {
+    "enabled": true
+  }
+}
