@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import login, market, trades
+from app.api import auth, market, trades
 
 app = FastAPI(title="NFL Stock Trader API")
 
@@ -14,7 +14,7 @@ app.add_middleware(
 )
 
 # Register routes
-app.include_router(login.router)
+app.include_router(auth.router)
 app.include_router(market.router)
 app.include_router(trades.router)
 
