@@ -12,9 +12,11 @@ from app.database import SessionLocal
 from app.models import User
 
 load_dotenv()
-
 JWT_SECRET = os.getenv("JWT_SECRET", "dev-secret-change-me")
 JWT_ALG = "HS256"
+print("🔐 JWT_SECRET in use:", JWT_SECRET)
+
+
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
