@@ -11,3 +11,11 @@ class TeamMarketInformation(Base):
     value = Column(Float, nullable=True)
     volume = Column(Float, nullable=False)
     timestamp = Column(DateTime, default=datetime.utcnow, index=True)
+
+class User(Base):
+    __tablename__ = "user"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(50), index=True, nullable=False)
+    password = Column(String(250), nullable=False)
+    balance = Column(Float, default=100, nullable=False)
