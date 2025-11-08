@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from app.database import SessionLocal
-from app.models import TeamMarketLive
+from app.models import TeamMarketInformation
 
 app = FastAPI(title="NFL Stock Trader API")
 
@@ -15,29 +15,31 @@ async def get_db():
 
 @app.get("/team/{team_name}")
 async def get_team_value(team_name: str, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(TeamMarketLive).where(TeamMarketLive.team_name == team_name))
-    team = result.scalar_one_or_none()
-    if not team:
+    result = await db.execute(select(TeamMarketInformation).where(TeamMarketInformation.team_name == team_name))
+    teams = result.scalars().all()
+    if not teams:
         return {"error": f"Team '{team_name}' not found"}
-    return {
-        "team_name": team.team_name,
-        "price": team.price,
-        "sentiment_score": team.sentiment_score,
-        "change": team.change,
-        "updated_at": team.updated_at,
+    return [ {
+        "team_name": t.team_name,
+        "price": t.price,
+        "value": t.value,
+        "volume": t.volume,
+        "timestamp": t.timestamp,
     }
+        for t in teams
+    ]
 
 @app.get("/all-teams")
 async def get_all_teams(db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(TeamMarketLive))
+    result = await db.execute(select(TeamMarketInformation))
     teams = result.scalars().all()
     return [
         {
             "team_name": t.team_name,
             "price": t.price,
-            "change": t.change,
-            "sentiment_score": t.sentiment_score,
-            "updated_at": t.updated_at,
+            "value": t.value,
+            "volume": t.volume,
+            "timestamp": t.timestamp,
         }
         for t in teams
     ]

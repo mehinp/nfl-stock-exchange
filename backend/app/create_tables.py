@@ -1,7 +1,7 @@
 # create_tables.py
 import asyncio
 from app.database import engine, Base
-from app.models import TeamMarketLive, TeamMarketHistory 
+from app.models import TeamMarketInformation
 
 async def create_tables():
     async with engine.begin() as conn:
