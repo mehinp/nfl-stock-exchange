@@ -1,6 +1,6 @@
 # create_tables.py
 import asyncio
-from app.database import engine, Base  # adjust this import path to your actual structure
+from app.database import engine, Base
 from app.models import TeamMarketLive, TeamMarketHistory 
 
 async def create_tables():
