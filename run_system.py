@@ -1,49 +1,44 @@
 import sys
-from pathlib import Path
+sys.path.append('.')
 
+from inference.live_monitor import LiveSwingMonitor
 
 def main():
-    print("=" * 60)
-    print("NFL SWING DETECTION SYSTEM")
-    print("=" * 60)
-    print("\nOptions:")
-    print("  1. Train custom models from scratch")
-    print("  2. Run live monitoring")
-    print("  3. Setup API keys")
-    print("  4. Exit")
+    print("Choose an option:")
+    print("1) Train models")
+    print("2) Offline game replay")
+    print("3) Step replay")
+    print("4) Live streaming monitor (ESPN)")
+    choice = input("Enter 1-4: ").strip()
 
-    choice = input("\nEnter choice (1-4): ").strip()
-
-    if choice == '1':
-        print("\nStarting training pipeline...")
-        print("This will take 15-30 minutes...")
-        from training.train_custom_models import CustomSwingModelTrainer
-        trainer = CustomSwingModelTrainer()
-        trainer.train_complete_pipeline()
-
-    elif choice == '2':
-        models_dir = Path('models/pretrained')
-        if not models_dir.exists() or not list(models_dir.glob('*.pkl')):
-            print("\nERROR: Models not found!")
-            print("Please train models first (Option 1)")
-            return
-
-        print("\nStarting live monitoring...")
-        from inference.live_monitor import LiveSwingMonitor
-        monitor = LiveSwingMonitor()
-        monitor.monitor_all_live_games()
-
-    elif choice == '3':
-        from setup_api_keys import setup_api_keys
-        setup_api_keys()
-
-    elif choice == '4':
-        print("Exiting...")
-        sys.exit(0)
-
+    if choice == "1":
+        try:
+            import scripts.train_models as train_models
+            train_models.main()
+        except Exception as e:
+            print(f"Error: {e}")
+    elif choice == "2":
+        try:
+            import scripts.game_replay as game_replay
+            game_replay.main()
+        except Exception as e:
+            print(f"Error: {e}")
+    elif choice == "3":
+        try:
+            import scripts.step_replay as step_replay
+            step_replay.main()
+        except Exception as e:
+            print(f"Error: {e}")
+    elif choice == "4":
+        try:
+            monitor = LiveSwingMonitor()
+            monitor.run()
+        except Exception as e:
+            print(f"Error starting live monitor: {e}")
+            import traceback
+            traceback.print_exc()
     else:
         print("Invalid choice")
-
 
 if __name__ == "__main__":
     main()
