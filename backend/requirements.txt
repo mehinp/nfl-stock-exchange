@@ -4,3 +4,5 @@ fastapi-users[sqlalchemy] >= 14.0.1
 imagekitio >= 4.2.0
 python-dotenv >= 1.1.1
 uvicorn[standard] >= 0.37.0
+aiomysql
+
