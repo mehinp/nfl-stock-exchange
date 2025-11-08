@@ -5,6 +5,7 @@ import { formatCurrency } from "@/lib/number-format";
 interface PortfolioStatsProps {
   totalValue: number;
   totalCost: number;
+  cashBalance: number;
   initialDeposit: number;
   dayChange: number;
   dayChangePercent: number;
@@ -13,11 +14,13 @@ interface PortfolioStatsProps {
 export default function PortfolioStats({
   totalValue,
   totalCost,
+  cashBalance,
   initialDeposit,
   dayChange,
   dayChangePercent,
 }: PortfolioStatsProps) {
   const safeTotalCost = totalCost > 0 ? totalCost : 0;
+  const safeCashBalance = cashBalance > 0 ? cashBalance : 0;
   const safeInitialDeposit = initialDeposit > 0 ? initialDeposit : 0;
   const totalProfitLoss = totalValue - safeInitialDeposit;
   const totalProfitLossPercent =
@@ -37,9 +40,9 @@ export default function PortfolioStats({
   const cards: CardConfig[] = [
     {
       icon: DollarSign,
-      label: "Total Value",
-      value: formatCurrency(totalValue),
-      subtitle: "Portfolio equity",
+      label: "Cash Balance",
+      value: formatCurrency(safeCashBalance),
+      subtitle: "Available to trade",
     },
     {
       icon: BarChart3,

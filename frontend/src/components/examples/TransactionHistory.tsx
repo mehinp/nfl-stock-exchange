@@ -9,6 +9,7 @@ export default function TransactionHistoryExample() {
       team: { name: 'Kansas City Chiefs', abbreviation: 'KC' },
       shares: 5,
       price: 145.50,
+      avgBuyPrice: 140.25,
     },
     {
       id: '2',
@@ -17,6 +18,7 @@ export default function TransactionHistoryExample() {
       team: { name: 'Miami Dolphins', abbreviation: 'MIA' },
       shares: 3,
       price: 118.20,
+      avgBuyPrice: 110.35,
     },
     {
       id: '3',
@@ -25,6 +27,7 @@ export default function TransactionHistoryExample() {
       team: { name: 'Baltimore Ravens', abbreviation: 'BAL' },
       shares: 8,
       price: 132.40,
+      avgBuyPrice: 128.0,
     },
   ];
 

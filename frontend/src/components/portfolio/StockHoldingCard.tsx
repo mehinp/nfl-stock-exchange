@@ -66,11 +66,11 @@ export default function StockHoldingCard({
 
         <div className="grid grid-cols-3 gap-4 text-sm">
           <div>
-            <div className="text-muted-foreground">Avg Cost</div>
+            <div className="text-muted-foreground">Average Buy Price</div>
             <div className="font-mono font-semibold">{formattedAvgCost}</div>
           </div>
           <div>
-            <div className="text-muted-foreground">Current</div>
+            <div className="text-muted-foreground">Current Price</div>
             <div className="font-mono font-semibold">{formattedCurrentPrice}</div>
           </div>
           <div>
@@ -81,7 +81,7 @@ export default function StockHoldingCard({
 
         <div className="pt-3 border-t border-border">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">P&L</span>
+            <span className="text-sm text-muted-foreground">Profit/Loss</span>
             <div className="flex items-center gap-2">
               <span className={`font-mono font-semibold ${profitLoss >= 0 ? 'text-success' : 'text-danger'}`}>
                 {formattedPnL}

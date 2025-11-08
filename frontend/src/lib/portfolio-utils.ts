@@ -129,6 +129,7 @@ export type SnapshotTransaction = {
   team: { name: string; abbreviation: string };
   shares: number;
   price: number;
+  avgBuyPrice: number | null;
 };
 
 const normalizeTrades = (trades: PortfolioTrade[] | undefined) =>
@@ -136,9 +137,11 @@ const normalizeTrades = (trades: PortfolioTrade[] | undefined) =>
     const parsedDate = parsePortfolioDate(trade.timestamp);
     const timestampValue = parsedDate.getTime();
     const hasValidTimestamp = Number.isFinite(timestampValue);
+    const avgBuyPriceNumber = trade.avg_buy_price ? toNumber(trade.avg_buy_price) : null;
     return {
       ...trade,
       priceNumber: toNumber(trade.price),
+      avgBuyPriceNumber,
       timestampValue: hasValidTimestamp ? timestampValue : -Infinity,
     };
   });
@@ -567,7 +570,7 @@ export function buildPortfolioSnapshot(
     .filter((position) => position.quantity > 0)
     .map((position, index) => {
       const metric = metrics.get(position.team_name);
-      const avgCost = toNumber(position.avg_price);
+      const avgCost = toNumber(position.avg_buy_price ?? position.avg_price);
       const currentPrice = metric?.price ?? avgCost;
       const totalValue = currentPrice * position.quantity;
       const totalCost = avgCost * position.quantity;
@@ -641,6 +644,7 @@ export function buildPortfolioSnapshot(
         },
         shares: trade.quantity,
         price: trade.priceNumber,
+        avgBuyPrice: trade.avgBuyPriceNumber,
       };
     });
 

@@ -23,16 +23,6 @@ export default function Portfolio() {
     [portfolioData, teams],
   );
 
-  const chartData =
-    snapshot.chartPoints.length > 0
-      ? snapshot.chartPoints
-      : [
-          {
-            date: new Date().toISOString(),
-            value: snapshot.totalValue,
-          },
-        ];
-
   const holdingsLoading = isPortfolioLoading || isTeamsLoading;
 
   const handleSellHolding = (holding: EnrichedHolding) => {
@@ -77,11 +67,7 @@ export default function Portfolio() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
-              {holdingsLoading ? (
-                <Skeleton className="h-[360px] w-full" />
-              ) : (
-                <PerformanceChart data={chartData} />
-              )}
+              {holdingsLoading ? <Skeleton className="h-[360px] w-full" /> : <PerformanceChart />}
 
               <div>
                 <h2 className="text-xl font-semibold mb-4">Your Holdings</h2>
@@ -119,6 +105,7 @@ export default function Portfolio() {
                 <PortfolioStats
                   totalValue={snapshot.totalValue}
                   totalCost={snapshot.totalCost}
+                  cashBalance={snapshot.cashBalance}
                   initialDeposit={snapshot.initialDeposit}
                   dayChange={snapshot.dayChangeValue}
                   dayChangePercent={snapshot.dayChangePercent}

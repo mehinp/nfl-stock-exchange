@@ -200,6 +200,7 @@ export interface PortfolioPosition {
   team_name: string;
   quantity: number;
   avg_price: string;
+  avg_buy_price?: string;
   last_transaction: string;
 }
 
@@ -209,6 +210,7 @@ export interface PortfolioTrade {
   action: "buy" | "sell";
   quantity: number;
   price: string;
+  avg_buy_price?: string;
   timestamp: string;
 }
 
@@ -223,3 +225,20 @@ export function fetchPortfolio() {
   return request<PortfolioResponse>("/trades/portfolio");
 }
 
+export interface PortfolioValuePoint {
+  timestamp: string;
+  cash_balance: string;
+  holdings_value: string;
+  total_value: string;
+}
+
+export interface PortfolioValueHistory {
+  user_id: number;
+  initial_deposit: string;
+  current_total_value: string;
+  history: PortfolioValuePoint[];
+}
+
+export function fetchPortfolioHistory() {
+  return request<PortfolioValueHistory>("/trades/portfolio/history");
+}

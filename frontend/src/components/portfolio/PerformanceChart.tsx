@@ -1,27 +1,16 @@
 import { Card } from "@/components/ui/card";
 import { useMemo, useState } from "react";
 import StockChart, { ChartRange } from "@/components/market/StockChart";
+import { usePortfolioValueHistory } from "@/hooks/usePortfolioValueHistory";
+import { Skeleton } from "@/components/ui/skeleton";
 
-interface DataPoint {
-  date: string;
-  value: number;
-  timestamp?: number;
-}
-
-interface PerformanceChartProps {
-  data: DataPoint[];
-}
-
-const DAY_MS = 24 * 60 * 60 * 1000;
-const WEEK_MS = DAY_MS * 7;
-const MONTH_MS = WEEK_MS * 4;
-
-export default function PerformanceChart({ data }: PerformanceChartProps) {
-  const [range, setRange] = useState<ChartRange>("1W");
+export default function PerformanceChart() {
+  const [range, setRange] = useState<ChartRange>("ALL");
+  const { data: portfolioHistory, isLoading, error } = usePortfolioValueHistory();
 
   const { chartData, latestValue, weekChangePercent, monthChangePercent, priceDomain } =
     useMemo(() => {
-      if (!data.length) {
+      if (!portfolioHistory || !portfolioHistory.history.length) {
         return {
           chartData: [],
           latestValue: 0,
@@ -31,25 +20,28 @@ export default function PerformanceChart({ data }: PerformanceChartProps) {
         };
       }
 
-      const baseTimestamp = Date.now() - (data.length - 1) * DAY_MS;
+      const DAY_MS = 24 * 60 * 60 * 1000;
+      const WEEK_MS = DAY_MS * 7;
+      const MONTH_MS = WEEK_MS * 4;
 
-      const normalized = data
-        .map((point, index) => {
-          const parsed = point.timestamp ?? Date.parse(point.date);
-          const timestamp = Number.isNaN(parsed)
-            ? baseTimestamp + index * DAY_MS
-            : parsed;
-          const dateLabel = new Date(timestamp).toLocaleDateString(undefined, {
-            month: "short",
-            day: "numeric",
-          });
-          return {
-            time: dateLabel,
-            price: point.value,
-            timestamp,
-          };
-        })
-        .sort((a, b) => (a.timestamp ?? 0) - (b.timestamp ?? 0));
+      // Convert history to chart format
+      const normalized = portfolioHistory.history.map((point) => {
+        const timestamp = new Date(point.timestamp).getTime();
+        const totalValue = parseFloat(point.total_value);
+        
+        const dateLabel = new Date(timestamp).toLocaleDateString(undefined, {
+          month: "short",
+          day: "numeric",
+        });
+        
+        return {
+          time: dateLabel,
+          price: totalValue,
+          timestamp,
+          cashBalance: parseFloat(point.cash_balance),
+          holdingsValue: parseFloat(point.holdings_value),
+        };
+      });
 
       const latest = normalized[normalized.length - 1];
       const latestTs = latest?.timestamp ?? Date.now();
@@ -93,16 +85,59 @@ export default function PerformanceChart({ data }: PerformanceChartProps) {
         monthChangePercent: changeFrom(latest?.price ?? 0, monthRef),
         priceDomain: domain,
       };
-    }, [data]);
+    }, [portfolioHistory]);
+
+  if (isLoading) {
+    return (
+      <Card className="p-6" data-testid="performance-chart">
+        <div className="space-y-4">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-80 w-full" />
+        </div>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="p-6" data-testid="performance-chart">
+        <div className="text-center py-8">
+          <p className="text-sm text-muted-foreground">
+            Unable to load portfolio history
+          </p>
+        </div>
+      </Card>
+    );
+  }
+
+  if (!chartData.length) {
+    return (
+      <Card className="p-6" data-testid="performance-chart">
+        <div className="text-center py-8">
+          <p className="text-sm text-muted-foreground">
+            No portfolio data yet. Start trading to see your performance!
+          </p>
+        </div>
+      </Card>
+    );
+  }
+
+  const hasCurrentTotalValue =
+    portfolioHistory?.current_total_value != null &&
+    portfolioHistory.current_total_value !== "" &&
+    Number.isFinite(Number(portfolioHistory.current_total_value));
+  const displayPrice = hasCurrentTotalValue
+    ? Number(portfolioHistory?.current_total_value)
+    : latestValue;
 
   return (
     <Card className="p-6" data-testid="performance-chart">
       <StockChart
-        teamName="Portfolio"
+        teamName="Portfolio Value"
         data={chartData}
         range={range}
         onRangeChange={setRange}
-        price={latestValue}
+        price={displayPrice}
         weekChangePercent={weekChangePercent}
         monthChangePercent={monthChangePercent}
         priceDomain={priceDomain}
