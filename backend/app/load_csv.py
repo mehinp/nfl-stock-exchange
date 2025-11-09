@@ -20,7 +20,7 @@ async def load_csv_to_db():
 
             record = TeamMarketInformation(
                 team_name=row["team_name"],
-                value=float(row["value"]),
+                value=float(row["value"]) * 2.5,
                 timestamp=pd.to_datetime(row["timestamp"]) if "timestamp" in row else datetime.utcnow(),
             )
             session.add(record)
