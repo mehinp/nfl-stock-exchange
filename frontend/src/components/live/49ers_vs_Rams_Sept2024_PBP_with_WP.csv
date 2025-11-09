@@ -1,0 +1,183 @@
+play_id,game_id,drive_id,quarter,clock,play_text,play_type,yards_gained,scoring_play,home_score,away_score,down,distance,yardline,yards_to_endzone,end_yardline,win_prob_teamA
+40167177239,401671772,4016717721,1,15:00,"E.Evans kicks 65 yards from LA 35 to end zone, Touchback to the SF 30.",Kickoff,0,FALSE,0,0,0,0,35,65,70,0.566454
+40167177256,401671772,4016717721,1,15:00,(Shotgun) J.Mason up the middle to SF 36 for 6 yards (N.Gallimore; C.Rozeboom).,Rush,6,FALSE,0,0,1,10,70,70,64,0.557661
+40167177278,401671772,4016717721,1,14:25,"B.Purdy pass short left to B.Aiyuk to SF 47 for 11 yards (C.Rozeboom). PENALTY on LA-C.Rozeboom, Face Mask, 15 yards, enforced at SF 47. Penalty on LA-B.Young, Roughing the Passer, declined.",Pass Reception,26,FALSE,0,0,2,4,64,64,38,0.526786
+4.01672E+11,401671772,4016717721,1,14:10,(Shotgun) B.Purdy pass incomplete short right to J.Jennings (B.Young).,Pass Incompletion,0,FALSE,0,0,1,10,38,24,38,0.471895
+4.01672E+11,401671772,4016717721,1,14:03,"J.Mason left tackle to LA 31 for 7 yards (Q.Lake, T.Reeder).",Rush,7,FALSE,0,0,2,10,38,38,31,0.479367
+4.01672E+11,401671772,4016717721,1,13:17,(Shotgun) J.Mason up the middle to LA 24 for 7 yards (K.Kinchens; K.Curl).,Rush,7,FALSE,0,0,3,3,31,31,24,0.489178
+4.01672E+11,401671772,4016717721,1,12:37,(Shotgun) J.Mason right guard to LA 20 for 4 yards (T.White; J.Verse).,Rush,4,FALSE,0,0,1,10,24,24,20,0.498479
+4.01672E+11,401671772,4016717721,1,11:59,B.Purdy pass short right to J.Mason pushed ob at LA 13 for 7 yards (T.Reeder).,Pass Reception,7,FALSE,0,0,2,6,20,20,13,0.468917
+4.01672E+11,401671772,4016717721,1,11:12,"B.Purdy pass short middle to J.Jennings for 13 yards, TOUCHDOWN.J.Moody extra point is GOOD, Center-T.Pepper, Holder-M.Wishnowsky.",Passing Touchdown,13,TRUE,0,7,1,10,13,13,0,0.449618
+4.01672E+11,401671772,4016717721,1,11:12,Timeout at 11:12.,Official Timeout,0,FALSE,0,7,1,10,65,65,65,0.451505
+4.01672E+11,401671772,4016717722,1,11:12,"J.Moody kicks 65 yards from SF 35 to end zone, Touchback to the LA 30.",Kickoff,0,FALSE,0,7,0,0,65,65,30,0.439609
+4.01672E+11,401671772,4016717722,1,11:12,K.Williams right guard to LA 35 for 5 yards (T.Hufanga).,Rush,5,FALSE,0,7,1,10,30,70,35,0.471163
+4.01672E+11,401671772,4016717722,1,10:31,K.Williams up the middle to LA 38 for 3 yards (D.Campbell; L.Floyd).,Rush,3,FALSE,0,7,2,5,35,65,38,0.586021
+4.01672E+11,401671772,4016717722,1,9:56,(Shotgun) M.Stafford pass incomplete short left to T.Johnson.,Pass Incompletion,0,FALSE,0,7,3,2,38,87,38,0.603385
+4.01672E+11,401671772,4016717722,1,9:40,"E.Evans punts 48 yards to SF 14, Center-A.Ward. J.Cowing pushed ob at SF 23 for 9 yards (N.Hampton).",Punt,9,FALSE,0,7,4,2,38,62,77,0.600937
+4.01672E+11,401671772,4016717722,1,9:40,Timeout at 09:40.,Official Timeout,0,FALSE,0,7,1,10,77,77,77,0.598235
+4.01672E+11,401671772,4016717723,1,9:40,J.Mason left tackle to SF 21 for -2 yards (B.Young).,Rush,-2,FALSE,0,7,1,10,77,77,79,0.466777
+4.01672E+11,401671772,4016717723,1,9:02,"(Shotgun) J.Mason up the middle to SF 25 for 4 yards (T.Reeder, C.Rozeboom).",Rush,4,FALSE,0,7,2,12,79,79,75,0.349938
+4.01672E+11,401671772,4016717723,1,8:17,"(Shotgun) B.Purdy pass incomplete deep middle to B.Aiyuk. PENALTY on LA-T.White, Defensive Holding, 5 yards, enforced at SF 25 - No Play.",Pass Incompletion,5,FALSE,0,7,3,8,75,75,70,0.365945
+4.01672E+11,401671772,4016717723,1,8:11,"(Shotgun) B.Purdy pass short middle to B.Aiyuk to SF 37 for 7 yards (K.Curl). PENALTY on SF-D.Puni, Ineligible Downfield Pass, 5 yards, enforced at SF 30 - No Play.",Pass Reception,-5,FALSE,0,7,1,10,70,70,75,0.360709
+4.01672E+11,401671772,4016717723,1,7:51,(Shotgun) B.Purdy pass incomplete deep left to B.Aiyuk [B.Brown].,Pass Incompletion,0,FALSE,0,7,1,15,75,38,75,0.353643
+4.01672E+11,401671772,4016717723,1,7:43,B.Purdy pass deep middle to J.Jennings to LA 41 for 34 yards (K.Curl).,Pass Reception,34,FALSE,0,7,2,15,75,75,41,0.364745
+4.01672E+11,401671772,4016717723,1,6:59,"J.Mason right tackle to LA 40 for 1 yard (T.Reeder, J.Verse).",Rush,1,FALSE,0,7,1,10,41,41,40,0.332539
+4.01672E+11,401671772,4016717723,1,6:00,(Shotgun) B.Purdy pass short middle to B.Aiyuk to LA 38 for 2 yards (C.Durant; B.Young).,Pass Reception,2,FALSE,0,7,2,9,40,40,38,0.291337
+4.01672E+11,401671772,4016717723,1,5:35,"(Shotgun) B.Purdy pass incomplete deep left to J.Jennings [J.Verse]. PENALTY on LA-Q.Lake, Illegal Contact, 5 yards, enforced at LA 38 - No Play.",Pass Incompletion,5,FALSE,0,7,3,7,38,38,33,0.290039
+4.01672E+11,401671772,4016717723,1,5:24,"(Shotgun) B.Purdy pass incomplete short left to R.Bell (T.White). PENALTY on SF-T.Williams, Offensive Holding, 10 yards, enforced at LA 33 - No Play.",Pass Incompletion,-10,FALSE,0,7,1,10,33,33,43,0.292209
+4.01672E+11,401671772,4016717723,1,5:20,(Shotgun) B.Purdy pass deep right to E.Saubert to LA 27 for 16 yards (K.Curl).,Pass Reception,16,FALSE,0,7,1,20,43,43,27,0.293782
+4.01672E+11,401671772,4016717723,1,4:41,(Shotgun) B.Purdy pass incomplete short left to B.Aiyuk.,Pass Incompletion,0,FALSE,0,7,2,4,27,10,27,0.28124
+4.01672E+11,401671772,4016717723,1,4:37,"(Shotgun) B.Purdy pass incomplete short right to B.Aiyuk [J.Verse]. PENALTY on LA-K.Curl, Defensive Pass Interference, 14 yards, enforced at LA 27 - No Play.",Pass Incompletion,14,FALSE,0,7,3,4,27,27,13,0.261362
+4.01672E+11,401671772,4016717723,1,4:32,J.Mason up the middle to LA 10 for 3 yards (C.Rozeboom).,Rush,3,FALSE,0,7,1,10,13,13,10,0.239287
+4.01672E+11,401671772,4016717723,1,3:59,(Shotgun) B.Purdy pass short left to B.Aiyuk to LA 1 for 9 yards (Q.Lake; C.Rozeboom).,Pass Reception,9,FALSE,0,7,2,7,10,10,1,0.237391
+4.01672E+11,401671772,4016717723,1,3:17,"J.Mason left guard to LA 4 for -3 yards (T.Davis, B.Brown).",Rush,-3,FALSE,0,7,1,1,1,1,4,0.224933
+4.01672E+11,401671772,4016717723,1,2:33,J.Mason up the middle to LA 4 for no gain (K.Kinchens).,Rush,0,FALSE,0,7,2,4,4,4,4,0.206583
+4.01672E+11,401671772,4016717723,1,1:47,"(Shotgun) B.Purdy pass short right to J.Jennings for 4 yards, TOUCHDOWN.J.Moody extra point is GOOD, Center-T.Pepper, Holder-M.Wishnowsky.",Passing Touchdown,4,TRUE,0,14,3,4,4,4,0,0.216426
+4.01672E+11,401671772,4016717723,1,1:47,Timeout at 01:47.,Official Timeout,0,FALSE,0,14,1,10,65,65,65,0.222521
+4.01672E+11,401671772,4016717724,1,1:47,"J.Moody kicks 65 yards from SF 35 to end zone, Touchback to the LA 30.",Kickoff,0,FALSE,0,14,0,0,65,65,30,0.231614
+4.01672E+11,401671772,4016717724,1,1:47,K.Williams left end pushed ob at LA 43 for 13 yards (T.Hufanga).,Rush,13,FALSE,0,14,1,10,30,70,43,0.604433
+4.01672E+11,401671772,4016717724,1,1:15,K.Williams up the middle to LA 49 for 6 yards (D.Campbell).,Rush,6,FALSE,0,14,1,10,43,57,49,0.786298
+4.01672E+12,401671772,4016717724,1,0:34,K.Williams up the middle to SF 49 for 2 yards (F.Warner; D.Campbell).,Rush,2,FALSE,0,14,2,4,49,51,51,0.773974
+4.01672E+12,401671772,4016717724,1,0:00,END QUARTER 1,End Period,0,FALSE,0,14,3,0,51,49,51,0.777098
+4.01672E+12,401671772,4016717724,2,15:00,"K.Williams right guard to SF 45 for 4 yards (L.Floyd, C.Ward).",Rush,4,FALSE,0,14,3,2,51,49,55,0.781193
+4.01672E+12,401671772,4016717724,2,14:20,"M.Stafford pass short left to D.Robinson ran ob at SF 38 for 7 yards. PENALTY on LA-H.Long, Offensive Holding, 10 yards, enforced at SF 45 - No Play.",Pass Reception,-10,FALSE,0,14,1,10,55,45,45,0.785976
+4.01672E+12,401671772,4016717724,2,13:54,(Shotgun) M.Stafford sacked at LA 36 for -9 yards (J.Hargrave).,Sack,-9,FALSE,0,14,1,20,45,55,36,0.783287
+4.01672E+12,401671772,4016717724,2,13:14,K.Williams up the middle to LA 36 for no gain (F.Warner).,Rush,0,FALSE,0,14,2,29,36,64,36,0.788924
+4.01672E+12,401671772,4016717724,2,12:34,"(Shotgun) K.Williams up the middle to LA 43 for 7 yards (D.Campbell, T.Hufanga).",Rush,7,FALSE,0,14,3,29,36,64,43,0.807223
+4.01672E+12,401671772,4016717724,2,11:51,"E.Evans punts 38 yards to SF 19, Center-A.Ward, out of bounds.",Punt,0,FALSE,0,14,4,22,43,57,81,0.821443
+4.01672E+12,401671772,4016717724,2,11:51,Timeout at 11:51.,Official Timeout,0,FALSE,0,14,1,10,80,80,80,0.666318
+4.01672E+12,401671772,4016717725,2,11:51,J.Mason right tackle to SF 22 for 3 yards (M.Hoecht; N.Gallimore).,Rush,3,FALSE,0,14,1,10,81,81,78,0.223391
+4.01672E+12,401671772,4016717725,2,11:14,B.Purdy pass short left to B.Aiyuk to SF 34 for 12 yards (C.Durant).,Pass Reception,12,FALSE,0,14,2,7,78,78,66,0.16175
+4.01672E+12,401671772,4016717725,2,10:30,"(Shotgun) B.Purdy pass short middle to K.Juszczyk to SF 40 for 6 yards (C.Rozeboom, M.Hoecht).",Pass Reception,6,FALSE,0,14,1,10,66,66,60,0.162874
+4.01672E+12,401671772,4016717725,2,9:52,J.Mason up the middle to SF 40 for no gain (T.White).,Rush,0,FALSE,0,14,2,4,60,60,60,0.153361
+4.01672E+12,401671772,4016717725,2,9:08,(Shotgun) B.Purdy pass incomplete deep middle to B.Aiyuk (T.White).,Pass Incompletion,0,FALSE,0,14,3,4,60,87,60,0.148128
+4.01672E+12,401671772,4016717725,2,8:55,"M.Wishnowsky punts 47 yards to LA 13, Center-T.Pepper, fair catch by X.Smith.",Punt,0,FALSE,0,14,4,4,60,60,13,0.147009
+4.01672E+12,401671772,4016717725,2,8:55,Timeout at 08:55.,Official Timeout,0,FALSE,0,14,1,10,13,87,13,0.153609
+4.01672E+12,401671772,4016717726,2,8:55,R.Rivers right end to LA 15 for 2 yards (J.Brown).,Rush,2,FALSE,0,14,1,10,13,87,15,0.502195
+4.01672E+12,401671772,4016717726,2,8:31,"(No Huddle, Shotgun) M.Stafford pass incomplete short right to T.Atwell (C.Ward).",Pass Incompletion,0,FALSE,0,14,2,8,15,61,15,0.846381
+4.01672E+12,401671772,4016717726,2,8:26,(Shotgun) M.Stafford pass short middle to T.Atwell to LA 39 for 24 yards (I.Yiadom).,Pass Reception,24,FALSE,0,14,3,8,15,85,39,0.850342
+4.01672E+12,401671772,4016717726,2,7:44,"M.Stafford pass incomplete deep left. PENALTY on LA-M.Stafford, Intentional Grounding, 11 yards, enforced at LA 39.",Pass Incompletion,-11,FALSE,0,14,1,10,39,61,28,0.858136
+4.01672E+12,401671772,4016717726,2,7:39,(Shotgun) M.Stafford pass short left to T.Johnson to LA 37 for 9 yards (I.Yiadom).,Pass Reception,9,FALSE,0,14,2,21,28,72,37,0.858858
+4.01672E+12,401671772,4016717726,2,6:58,(Shotgun) M.Stafford pass short right to T.Johnson to LA 43 for 6 yards (C.Ward; J.Brown).,Pass Reception,6,FALSE,0,14,3,12,37,63,43,0.825765
+4.01672E+12,401671772,4016717726,2,6:22,(Punt formation) Direct snap to R.Rivers.  R.Rivers left end to 50 for 7 yards (C.Conley). SF-D.Winters was injured during the play.,Rush,7,FALSE,0,14,4,6,43,57,50,0.826557
+4.01672E+12,401671772,4016717726,2,5:48,Timeout at 05:48.,Official Timeout,0,FALSE,0,14,1,10,50,50,50,0.84161
+4.01672E+12,401671772,4016717726,2,5:44,M.Stafford pass short right to J.Whittington pushed ob at SF 44 for 6 yards (C.Ward).,Pass Reception,6,FALSE,0,14,1,10,50,50,56,0.848052
+4.01672E+12,401671772,4016717726,2,5:09,K.Williams up the middle to SF 40 for 4 yards (J.Elliott). LA-L.Bruss was injured during the play.,Rush,4,FALSE,0,14,2,4,56,44,60,0.847422
+4.01672E+12,401671772,4016717726,2,4:26,M.Stafford pass short left to C.Parkinson to SF 36 for 4 yards (I.Yiadom).,Pass Reception,4,FALSE,0,14,1,10,60,40,64,0.839911
+4.01672E+12,401671772,4016717726,2,3:47,M.Stafford pass short left to J.Whittington to SF 29 for 7 yards (I.Yiadom; N.Bosa).,Pass Reception,7,FALSE,0,14,2,6,64,36,71,0.810802
+4.01672E+12,401671772,4016717726,2,3:06,(Shotgun) M.Stafford pass short right to C.Parkinson to SF 20 for 9 yards (D.Lenoir). ** Injury Update: LA-L.Bruss has returned to the game.,Pass Reception,9,FALSE,0,14,1,10,71,29,80,0.801297
+4.01672E+12,401671772,4016717726,2,2:23,K.Williams up the middle to SF 21 for -1 yards (D.Lenoir).,Rush,-1,FALSE,0,14,2,1,80,20,79,0.804362
+4.01672E+12,401671772,4016717726,2,2:00,Two-Minute Warning,Two-minute warning,0,FALSE,0,14,3,2,79,21,79,0.799086
+4.01672E+12,401671772,4016717726,2,2:00,(Shotgun) K.Williams up the middle to SF 16 for 5 yards (J.Hargrave).,Rush,5,FALSE,0,14,3,2,79,21,84,0.799058
+4.01672E+12,401671772,4016717726,2,1:22,(Shotgun) K.Williams left end to SF 15 for 1 yard (I.Yiadom; J.Hargrave).,Rush,1,FALSE,0,14,1,10,84,16,85,0.802623
+4.01672E+12,401671772,4016717726,2,1:15,Timeout #1 by SF at 01:15.,Timeout,0,FALSE,0,14,2,8,85,14,85,0.788305
+4.01672E+12,401671772,4016717726,2,1:11,"(Shotgun) M.Stafford pass short middle to K.Williams for 15 yards, TOUCHDOWN.J.Karty extra point is GOOD, Center-A.Ward, Holder-E.Evans.",Passing Touchdown,15,TRUE,7,14,2,9,85,15,100,0.768726
+4.01672E+12,401671772,4016717726,2,1:11,Timeout at 01:11.,Official Timeout,0,FALSE,7,14,1,10,35,65,35,0.744146
+4.01672E+12,401671772,4016717727,2,1:11,"E.Evans kicks 65 yards from LA 35 to end zone, Touchback to the SF 30.",Kickoff,0,FALSE,7,14,0,0,35,65,70,0.758836
+4.01672E+12,401671772,4016717727,2,1:11,"(Shotgun) B.Purdy pass short right to J.Jennings to SF 41 for 11 yards (T.Reeder, K.Curl) [J.Verse].",Pass Reception,11,FALSE,7,14,1,10,70,70,59,0.763938
+4.01672E+12,401671772,4016717727,2,0:47,"(No Huddle, Shotgun) B.Purdy scrambles right end ran ob at LA 48 for 11 yards (K.Kinchens). SF-T.Williams was injured during the play.",Rush,11,FALSE,7,14,1,10,59,59,48,0.757878
+4.01672E+12,401671772,4016717727,2,0:42,Timeout #2 by SF at 00:42. SF Injury under 2 minutes - SF charged timeout,Timeout,0,FALSE,7,14,1,10,48,48,48,0.763943
+4.01672E+12,401671772,4016717727,2,0:42,"(Shotgun) B.Purdy pass short left to E.Saubert to LA 40 for 8 yards (Q.Lake, J.McCollough).",Pass Reception,8,FALSE,7,14,1,10,48,48,40,0.631986
+4.01672E+12,401671772,4016717727,2,0:31,Timeout #3 by SF at 00:31.,Timeout,0,FALSE,7,14,2,2,40,40,40,0.315143
+4.01672E+12,401671772,4016717727,2,0:27,"(Shotgun) B.Purdy sacked at LA 47 for -7 yards (B.Young). FUMBLES (B.Young), RECOVERED by LA-B.Fiske at LA 44.",Sack,0,FALSE,7,14,2,2,40,40,44,0.265752
+4.01672E+12,401671772,4016717728,2,0:26,(Shotgun) M.Stafford sacked at LA 37 for -7 yards (M.Collins).,Sack,-7,FALSE,7,14,1,10,44,56,37,0.251685
+4.01672E+12,401671772,4016717728,2,0:22,Timeout #1 by LA at 00:22.,Timeout,0,FALSE,7,14,2,17,37,63,37,0.250446
+4.01672E+12,401671772,4016717728,2,0:21,(Shotgun) M.Stafford pass incomplete deep right to D.Robinson.,Pass Incompletion,0,FALSE,7,14,2,17,37,65,37,0.235346
+4.01672E+12,401671772,4016717728,2,0:15,K.Williams left guard to LA 41 for 4 yards (D.Lenoir; I.Yiadom).,Rush,4,FALSE,7,14,3,17,37,63,41,0.314276
+4.01672E+12,401671772,4016717728,2,0:00,END QUARTER 2,End of Half,0,FALSE,7,14,0,0,65,0,65,0.576187
+4.01672E+12,401671772,4016717729,3,15:00,"J.Moody kicks 65 yards from SF 35 to end zone, Touchback to the LA 30.",Kickoff,0,FALSE,7,14,0,0,65,65,30,0.648186
+4.01672E+12,401671772,4016717729,3,15:00,"(Shotgun) M.Stafford pass short middle to J.Whittington to LA 45 for 15 yards (C.Ward; T.Hufanga). Penalty on SF-L.Floyd, Illegal Use of Hands, declined.",Pass Reception,15,FALSE,7,14,1,10,30,70,45,0.675151
+4.01672E+12,401671772,4016717729,3,14:30,M.Stafford pass incomplete short right.,Pass Incompletion,0,FALSE,7,14,1,10,45,91,45,0.692118
+4.01672E+12,401671772,4016717729,3,14:24,(Shotgun) M.Stafford pass short middle to T.Johnson to 50 for 5 yards (L.Floyd).,Pass Reception,5,FALSE,7,14,2,10,45,55,50,0.698862
+4.01672E+12,401671772,4016717729,3,13:43,(Shotgun) M.Stafford pass incomplete short left to C.Parkinson (J.Brown).,Pass Incompletion,0,FALSE,7,14,3,5,50,63,50,0.694855
+4.01672E+12,401671772,4016717729,3,13:38,"E.Evans punts 41 yards to SF 9, Center-A.Ward, downed by LA-N.Kalinic.",Punt,0,FALSE,7,14,4,5,50,50,91,0.668439
+4.01672E+12,401671772,4016717729,3,13:28,Timeout at 13:28.,Official Timeout,0,FALSE,7,14,1,10,91,91,91,0.669951
+4.01672E+12,401671772,40167177210,3,13:28,(Shotgun) B.Purdy pass incomplete short left to B.Aiyuk. ** Injury Update: SF-T.Williams has returned to the game.,Pass Incompletion,0,FALSE,7,14,1,10,91,36,91,0.680125
+4.01672E+12,401671772,40167177210,3,13:24,B.Purdy pass short left to J.Jennings to SF 18 for 9 yards (C.Durant; C.Rozeboom).,Pass Reception,9,FALSE,7,14,2,10,91,91,82,0.686095
+4.01672E+12,401671772,40167177210,3,12:40,"B.Purdy up the middle to SF 20 for 2 yards (K.Turner, T.Davis).",Rush,2,FALSE,7,14,3,1,82,82,80,0.504955
+4.01672E+12,401671772,40167177210,3,12:02,"(Shotgun) B.Purdy pass short right to J.Mason to SF 23 for 3 yards (T.Reeder, J.Verse).",Pass Reception,3,FALSE,7,14,1,10,80,80,77,0.291175
+4.01672E+12,401671772,40167177210,3,11:21,(Shotgun) J.Mason up the middle to SF 37 for 14 yards (Q.Lake; K.Kinchens).,Rush,14,FALSE,7,14,2,7,77,77,63,0.303803
+4.01672E+12,401671772,40167177210,3,10:40,I.Guerendo left guard to SF 42 for 5 yards (D.Johnson; B.Brown).,Rush,5,FALSE,7,14,1,10,63,63,58,0.297548
+4.01672E+12,401671772,40167177210,3,10:02,(Shotgun) I.Guerendo up the middle to SF 46 for 4 yards (C.Rozeboom; B.Brown).,Rush,4,FALSE,7,14,2,5,58,58,54,0.282547
+4.01672E+12,401671772,40167177210,3,9:22,J.Mason left end to LA 36 for 18 yards (Q.Lake).,Rush,18,FALSE,7,14,3,1,54,54,36,0.275129
+4.01672E+12,401671772,40167177210,3,8:38,(Shotgun) B.Purdy scrambles left tackle to LA 32 for 4 yards (K.Turner).,Rush,4,FALSE,7,14,1,10,36,36,32,0.27319
+4.01672E+12,401671772,40167177210,3,7:51,"I.Guerendo right tackle to LA 31 for 1 yard (K.Turner, B.Young).",Rush,1,FALSE,7,14,2,6,32,32,31,0.271991
+4.01672E+12,401671772,40167177210,3,7:01,"(Shotgun) B.Purdy pass deep left to J.Jennings for 31 yards, TOUCHDOWN.J.Moody extra point is GOOD, Center-T.Pepper, Holder-M.Wishnowsky.",Passing Touchdown,31,TRUE,7,21,3,5,31,31,0,0.244171
+4.01672E+12,401671772,40167177210,3,7:01,Timeout at 07:01.,Official Timeout,0,FALSE,7,21,1,10,65,65,65,0.233072
+4.01672E+12,401671772,40167177211,3,7:01,"J.Moody kicks 65 yards from SF 35 to end zone, Touchback to the LA 30.",Kickoff,0,FALSE,7,21,0,0,65,65,30,0.234608
+4.01672E+12,401671772,40167177211,3,7:01,"PENALTY on LA-A.Jackson, False Start, 5 yards, enforced at LA 30 - No Play.",Penalty,-5,FALSE,7,21,1,10,30,70,25,0.237954
+4.01672E+12,401671772,40167177211,3,7:01,"(Shotgun) M.Stafford pass incomplete deep left to T.Atwell. LA-T.Atwell was injured during the play.  PENALTY on SF-I.Yiadom, Defensive Pass Interference, 48 yards, enforced at LA 25 - No Play.",Pass Incompletion,48,FALSE,7,21,1,15,25,75,73,0.225675
+4.01672E+12,401671772,40167177211,3,6:53,K.Williams right end pushed ob at SF 23 for 4 yards (D.Campbell).,Rush,4,FALSE,7,21,1,10,73,27,77,0.199581
+4.01672E+12,401671772,40167177211,3,6:19,"K.Williams left end to SF 26 for -3 yards (N.Bosa). FUMBLES (N.Bosa), RECOVERED by SF-K.Givens at SF 26. The Replay Official reviewed the runner was not down by contact ruling, and the play was REVERSED. K.Williams left end to SF 26 for -3 yards (N.Bosa).",Rush,-3,FALSE,7,21,2,6,77,23,74,0.182378
+4.01672E+12,401671772,40167177211,3,6:15,Timeout at 06:15.,Official Timeout,0,FALSE,7,21,3,9,74,26,74,0.17383
+4.01672E+12,401671772,40167177211,3,5:57,(Shotgun) M.Stafford pass short middle to T.Atwell ran ob at SF 15 for 11 yards (T.Hufanga). ** Injury Update: LA-T.Atwell has returned to the game.,Pass Reception,11,FALSE,7,21,3,9,74,26,85,0.174384
+4.01672E+12,401671772,40167177211,3,5:18,K.Williams right guard to SF 9 for 6 yards (R.Green; J.Brown).,Rush,6,FALSE,7,21,1,10,85,15,91,0.596324
+4.01672E+12,401671772,40167177211,3,4:38,"K.Williams right guard to SF 6 for 3 yards (T.Hufanga, R.Green).",Rush,3,FALSE,7,21,2,4,91,9,94,0.834708
+4.01672E+12,401671772,40167177211,3,4:01,"M.Stafford pass incomplete short right to T.Johnson (R.Green) [D.Lenoir]. PENALTY on SF-R.Green, Defensive Holding, 3 yards, enforced at SF 6 - No Play.",Pass Incompletion,3,FALSE,7,21,3,1,94,6,97,0.826261
+4.01672E+12,401671772,40167177211,3,3:53,"K.Williams left guard for 3 yards, TOUCHDOWN.J.Karty extra point is GOOD, Center-A.Ward, Holder-E.Evans.",Rushing Touchdown,3,TRUE,14,21,1,3,97,3,100,0.85049
+4.01672E+12,401671772,40167177211,3,3:53,Timeout at 03:53.,Official Timeout,0,FALSE,14,21,1,10,35,65,35,0.856804
+4.01672E+12,401671772,40167177212,3,3:53,"E.Evans kicks 65 yards from LA 35 to end zone, Touchback to the SF 30.",Kickoff,0,FALSE,14,21,0,0,35,65,70,0.832663
+4.01672E+12,401671772,40167177212,3,3:53,B.Purdy pass deep left to J.Jennings to LA 38 for 32 yards (Q.Lake).,Pass Reception,32,FALSE,14,21,1,10,70,70,38,0.821507
+4.01672E+12,401671772,40167177212,3,3:05,"J.Mason right tackle to LA 29 for 9 yards (Q.Lake; B.Brown). PENALTY on SF-J.Brendel, Illegal Block Above the Waist, 10 yards, enforced at LA 36.",Rush,-8,FALSE,14,21,1,10,38,38,46,0.813795
+4.01672E+12,401671772,40167177212,3,2:36,(Shotgun) B.Purdy pass short middle to J.Jennings to LA 32 for 14 yards (K.Kinchens).,Pass Reception,14,FALSE,14,21,1,18,46,46,32,0.809108
+4.01672E+12,401671772,40167177212,3,2:00,(Shotgun) B.Purdy pass incomplete short left to R.Bell.,Pass Incompletion,0,FALSE,14,21,2,4,32,18,32,0.483077
+4.01672E+12,401671772,40167177212,3,1:57,(Shotgun) B.Purdy scrambles left end ran ob at LA 27 for 5 yards (Q.Lake).,Rush,5,FALSE,14,21,3,4,32,32,27,0.209109
+4.01672E+12,401671772,40167177212,3,1:20,I.Guerendo left tackle to LA 21 for 6 yards (C.Rozeboom).,Rush,6,FALSE,14,21,1,10,27,27,21,0.176258
+4.01672E+12,401671772,40167177212,3,0:39,I.Guerendo up the middle to LA 18 for 3 yards (K.Curl).,Rush,3,FALSE,14,21,2,4,21,21,18,0.182127
+4.01672E+12,401671772,40167177212,3,0:00,END QUARTER 3,End Period,0,FALSE,14,21,3,0,18,18,18,0.184909
+4.01672E+12,401671772,40167177212,4,15:00,"B.Purdy up the middle to LA 17 for 1 yard (K.Turner). FUMBLES (K.Turner), RECOVERED by LA-B.Young at LA 14. The Replay Official reviewed the runner was not down by contact ruling, and the play was REVERSED. B.Purdy up the middle to LA 18 for no gain (N.Gallimore).",Rush,0,FALSE,14,21,3,1,18,18,18,0.154158
+4.01672E+12,401671772,40167177212,4,14:52,B.Purdy up the middle to LA 16 for 2 yards (B.Fiske).,Rush,2,FALSE,14,21,4,1,18,18,16,0.153935
+4.01672E+12,401671772,40167177212,4,14:09,B.Purdy scrambles right end to LA 8 for 8 yards (K.Curl).,Rush,8,FALSE,14,21,1,10,16,16,8,0.15866
+4.01672E+12,401671772,40167177212,4,13:25,J.Mason up the middle to LA 7 for 1 yard (K.Turner; T.Reeder).,Rush,1,FALSE,14,21,2,2,8,8,7,0.147502
+4.01672E+12,401671772,40167177212,4,12:44,"J.Mason left tackle to LA 8 for -1 yards (T.Reeder, Q.Lake).",Rush,-1,FALSE,14,21,3,1,7,7,8,0.138822
+4.01672E+12,401671772,40167177212,4,11:57,"J.Moody 26 yard field goal is GOOD, Center-T.Pepper, Holder-M.Wishnowsky.",Field Goal Good,26,TRUE,14,24,4,2,8,8,0,0.131923
+4.01672E+12,401671772,40167177212,4,11:57,Timeout at 11:57.,Official Timeout,0,FALSE,14,24,1,10,65,65,65,0.128317
+4.01672E+12,401671772,40167177213,4,11:57,"J.Moody kicks 65 yards from SF 35 to end zone, Touchback to the LA 30.",Kickoff,0,FALSE,14,24,0,0,65,65,30,0.132637
+4.01672E+12,401671772,40167177213,4,11:57,"M.Stafford pass short right to K.Williams ran ob at LA 45 for 15 yards (C.Ward). PENALTY on LA-C.Parkinson, Illegal Block Above the Waist, 10 yards, enforced at LA 42.",Pass Reception,2,FALSE,14,24,1,10,30,70,32,0.137377
+4.01672E+12,401671772,40167177213,4,11:24,"M.Stafford pass deep middle to D.Robinson to SF 36 for 32 yards (D.Lenoir, F.Warner).",Pass Reception,32,FALSE,14,24,1,8,32,68,64,0.122788
+4.01672E+12,401671772,40167177213,4,10:17,"(Shotgun) T.Atwell pass deep right to D.Robinson to SF 2 for 34 yards (J.Brown). San Francisco challenged the pass completion ruling, and the play was REVERSED. (Shotgun) T.Atwell pass incomplete deep right to D.Robinson (J.Brown).",Pass Incompletion,0,FALSE,14,24,1,10,64,36,64,0.110545
+4.01672E+12,401671772,40167177213,4,10:35,Timeout at 10:35.,Official Timeout,0,FALSE,14,24,1,10,64,36,64,0.101018
+4.01672E+12,401671772,40167177213,4,10:34,(Shotgun) M.Stafford pass short left to T.Atwell ran ob at SF 28 for 8 yards.,Pass Reception,8,FALSE,14,24,2,10,64,36,72,0.102414
+4.01672E+12,401671772,40167177213,4,10:00,(Shotgun) M.Stafford pass short right to C.Parkinson pushed ob at SF 20 for 8 yards (J.Brown).,Pass Reception,8,FALSE,14,24,3,2,72,28,80,0.384779
+4.01672E+12,401671772,40167177213,4,9:24,K.Williams right end pushed ob at SF 16 for 4 yards (C.Ward).,Rush,4,FALSE,14,24,1,10,80,20,84,0.831905
+4.01672E+12,401671772,40167177213,4,8:45,"K.Williams right guard to SF 11 for 5 yards (R.Beal, T.Hufanga).",Rush,5,FALSE,14,24,2,6,84,16,89,0.836182
+4.01672E+12,401671772,40167177213,4,8:03,M.Stafford pass incomplete short right to C.Parkinson (F.Warner) [N.Bosa].,Pass Incompletion,0,FALSE,14,24,3,1,89,70,89,0.828463
+4.01672E+12,401671772,40167177213,4,7:58,K.Williams right guard to SF 8 for 3 yards (C.Ward).,Rush,3,FALSE,14,24,4,1,89,11,92,0.811722
+4.01672E+12,401671772,40167177213,4,7:12,(Shotgun) M.Stafford pass incomplete short right [D.Campbell].,Pass Incompletion,0,FALSE,14,24,1,8,92,55,92,0.831467
+4.01672E+12,401671772,40167177213,4,7:06,(Shotgun) M.Stafford sacked at SF 15 for -7 yards (S.Okuayinonu).,Sack,-7,FALSE,14,24,2,8,92,8,85,0.832562
+4.01672E+12,401671772,40167177213,4,6:23,Timeout #1 by LA at 06:23.,Timeout,0,FALSE,14,24,3,15,85,15,85,0.815319
+4.01672E+12,401671772,40167177213,4,6:23,(Shotgun) M.Stafford pass incomplete short left to D.Robinson.,Pass Incompletion,0,FALSE,14,24,3,15,85,42,85,0.778806
+4.01672E+12,401671772,40167177213,4,6:15,"J.Karty 33 yard field goal is GOOD, Center-A.Ward, Holder-E.Evans.",Field Goal Good,33,TRUE,17,24,4,15,85,15,100,0.763365
+4.01672E+12,401671772,40167177214,4,6:15,"E.Evans kicks 65 yards from LA 35 to end zone, Touchback to the SF 30.",Kickoff,0,FALSE,17,24,0,0,35,65,70,0.772829
+4.01672E+12,401671772,40167177214,4,6:15,B.Purdy pass short middle to J.Jennings to SF 45 for 15 yards (C.Durant; T.Reeder).,Pass Reception,15,FALSE,17,24,1,10,70,70,55,0.778387
+4.01672E+12,401671772,40167177214,4,5:35,J.Mason left end pushed ob at LA 46 for 9 yards (T.White).,Rush,9,FALSE,17,24,1,10,55,55,46,0.799049
+4.01672E+12,401671772,40167177214,4,4:57,J.Mason left tackle to LA 42 for 4 yards (T.Reeder; C.Rozeboom).,Rush,4,FALSE,17,24,2,1,46,46,42,0.840892
+4.01672E+12,401671772,40167177214,4,4:14,"I.Guerendo left end pushed ob at LA 37 for 5 yards (T.Reeder). PENALTY on SF-K.Juszczyk, Offensive Holding, 10 yards, enforced at LA 42 - No Play.",Rush,-10,FALSE,17,24,1,10,42,42,52,0.800597
+4.01672E+12,401671772,40167177214,4,4:08,(Shotgun) B.Purdy pass short right to J.Jennings to LA 47 for 5 yards (M.Hoecht) [N.Gallimore].,Pass Reception,5,FALSE,17,24,1,20,52,52,47,0.778856
+4.01672E+12,401671772,40167177214,4,3:11,(Shotgun) B.Purdy pass short left to J.Jennings pushed ob at LA 40 for 7 yards (Q.Lake).,Pass Reception,7,FALSE,17,24,2,15,47,47,40,0.802776
+4.01672E+12,401671772,40167177214,4,3:09,Timeout #1 by SF at 03:09.,Timeout,0,FALSE,17,24,3,8,40,40,40,0.842817
+4.01672E+12,401671772,40167177214,4,3:08,(Shotgun) B.Purdy scrambles left end to LA 37 for 3 yards (J.McCollough).,Rush,3,FALSE,17,24,3,8,40,40,37,0.70415
+4.01672E+12,401671772,40167177214,4,2:48,Timeout #2 by LA at 02:48.,Timeout,0,FALSE,17,24,4,5,37,37,37,0.20723
+4.01672E+12,401671772,40167177214,4,2:47,Jake Moody 55 Yard Field Goal Missed,Field Goal Missed,55,FALSE,17,24,4,5,37,37,37,0.100387
+4.01672E+12,401671772,40167177215,4,2:43,M.Stafford pass deep right to T.Atwell to SF 5 for 50 yards (C.Ward).,Pass Reception,50,FALSE,17,24,1,10,45,55,95,0.084197
+4.01672E+12,401671772,40167177215,4,2:00,Two-Minute Warning,Two-minute warning,0,FALSE,17,24,1,5,95,5,95,0.07324
+4.01672E+12,401671772,40167177215,4,1:59,"(Shotgun) K.Williams up the middle to SF 4 for 1 yard (L.Floyd, K.Givens).",Rush,1,FALSE,17,24,1,5,95,5,96,0.070253
+4.01672E+12,401671772,40167177215,4,1:54,Timeout #2 by SF at 01:54.,Timeout,0,FALSE,17,24,2,4,96,4,96,0.071074
+4.01672E+12,401671772,40167177215,4,1:51,"(Shotgun) K.Williams up the middle for 4 yards, TOUCHDOWN.J.Karty extra point is GOOD, Center-A.Ward, Holder-E.Evans.",Rushing Touchdown,4,TRUE,24,24,2,4,96,4,100,0.076255
+4.01672E+12,401671772,40167177216,4,1:51,"E.Evans kicks 65 yards from LA 35 to end zone, Touchback to the SF 30.",Kickoff,0,FALSE,24,24,0,0,35,65,70,0.076586
+4.01672E+12,401671772,40167177216,4,1:51,(Shotgun) B.Purdy scrambles right end pushed ob at SF 34 for 4 yards (J.Verse).,Rush,4,FALSE,24,24,1,10,70,70,66,0.181481
+4.01672E+12,401671772,40167177216,4,1:46,(Shotgun) B.Purdy pass short left to B.Aiyuk to SF 43 for 9 yards (C.Durant; K.Kinchens).,Pass Reception,9,FALSE,24,24,2,6,66,66,57,0.686247
+4.01672E+12,401671772,40167177216,4,1:12,(Shotgun) B.Purdy pass incomplete short left to B.Aiyuk.,Pass Incompletion,0,FALSE,24,24,1,10,57,19,57,0.763711
+4.01672E+12,401671772,40167177216,4,1:08,(Shotgun) B.Purdy pass incomplete deep right to R.Bell.,Pass Incompletion,0,FALSE,24,24,2,10,57,50,57,0.668728
+4.01672E+12,401671772,40167177216,4,1:02,(Shotgun) B.Purdy scrambles up the middle to SF 45 for 2 yards (B.Fiske; K.Turner).,Rush,2,FALSE,24,24,3,10,57,57,55,0.674523
+4.01672E+12,401671772,40167177216,4,0:56,Timeout #3 by LA at 00:56.,Timeout,0,FALSE,24,24,4,8,55,55,55,0.571598
+4.01672E+12,401671772,40167177216,4,0:55,"M.Wishnowsky punts 43 yards to LA 12, Center-T.Pepper. X.Smith pushed ob at 50 for 38 yards (M.Wishnowsky).",Punt,38,FALSE,24,24,4,8,55,55,50,0.430135
+4.01672E+12,401671772,40167177217,4,0:42,"(Shotgun) M.Stafford pass incomplete deep right to C.Parkinson. Penalty on SF-D.Lenoir, Defensive Holding, declined. Penalty on SF-D.Lenoir, Illegal Use of Hands, declined. PENALTY on SF-D.Campbell, Defensive Pass Interference, 25 yards, enforced at 50 - No Play.",Pass Incompletion,25,FALSE,24,24,1,10,50,50,75,0.432637
+4.01672E+12,401671772,40167177217,4,0:25,"K.Williams right guard to SF 19 for 6 yards (C.Ward, F.Warner).",Rush,6,FALSE,24,24,1,10,75,25,81,0.414101
+4.01672E+12,401671772,40167177217,4,0:05,Timeout #3 by SF at 00:05.,Timeout,0,FALSE,24,24,2,4,81,19,81,0.384917
+4.01672E+12,401671772,40167177217,4,0:04,(No Huddle) M.Stafford spiked the ball to stop the clock.,Pass Incompletion,0,FALSE,24,24,2,4,81,70,81,0.389382
+4.01672E+12,401671772,40167177217,4,0:05,Timeout #3 by SF at 00:05.,Timeout,0,FALSE,24,24,3,4,81,19,81,0.408666
+4.01672E+12,401671772,40167177217,4,0:02,"J.Karty 37 yard field goal is GOOD, Center-A.Ward, Holder-E.Evans.",Field Goal Good,37,TRUE,27,24,2,4,81,19,100,0.431611
+4.01672E+12,401671772,40167177218,4,0:02,"E.Evans kicks 65 yards from LA 35 to end zone, Touchback to the SF 30.",Kickoff,0,FALSE,27,24,0,0,35,65,70,0.275732
+4.01672E+12,401671772,40167177218,4,0:02,"(Shotgun) B.Purdy pass short left to R.Bell to SF 42 for 12 yards. Lateral to E.Saubert to SF 39 for -3 yards. Lateral to B.Aiyuk to SF 44 for 5 yards. Lateral to J.Mason to SF 45 for 1 yard. Lateral to D.Puni to SF 42 for -3 yards. Lateral to E.Saubert to LA 38 for 20 yards. Lateral to J.Brendel to LA 35 for 3 yards (K.Curl). FUMBLES (K.Curl), ball out of bounds at LA 36.",Pass Reception,5,FALSE,27,24,1,10,35,70,35,0.435329
+4.01672E+12,401671772,40167177218,4,0:00,END GAME,End of Game,0,FALSE,27,24,0,0,70,0,70,0.884959

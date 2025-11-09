@@ -9,8 +9,6 @@ export function useMarketNavigation() {
     const meta = findTeamMetadata(teamName);
     const target = meta?.city ?? teamName;
 
-    const params = new URLSearchParams();
-    params.set("team", target);
-    navigate(`/market?${params.toString()}`);
+    navigate(`/market?=${encodeURIComponent(target)}`);
   };
 }

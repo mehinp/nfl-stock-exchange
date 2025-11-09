@@ -6,6 +6,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { PortfolioLiveHistoryPoint } from "@/lib/api";
 import { ChartRange, filterPointsByRange } from "@/lib/chart-range";
 
+type ChartPoint = { time: string; price: number; timestamp: number };
+
 export default function PerformanceChart() {
   const [range, setRange] = useState<ChartRange>("1D");
   const { data: portfolioHistory, isLoading, error } = usePortfolioValueHistory();
@@ -31,18 +33,21 @@ export default function PerformanceChart() {
       const WEEK_MS = DAY_MS * 7;
       const MONTH_MS = WEEK_MS * 4;
 
-      const historyPoints = portfolioHistory.history
-        .map((point: PortfolioLiveHistoryPoint) => {
+      const historyPoints: ChartPoint[] = portfolioHistory.history
+        .map((point: PortfolioLiveHistoryPoint): ChartPoint | null => {
           const timestamp = new Date(point.timestamp).getTime();
-          const balance = parseFloat(point.balance ?? "0");
-          if (Number.isNaN(timestamp) || !Number.isFinite(balance)) return null;
+          const balance = Number.parseFloat(point.balance ?? "0");
+          if (!Number.isFinite(timestamp) || Number.isNaN(balance)) return null;
           return {
-            time: new Date(timestamp).toLocaleDateString(undefined, { month: "short", day: "numeric" }),
+            time: new Date(timestamp).toLocaleDateString(undefined, {
+              month: "short",
+              day: "numeric",
+            }),
             price: balance,
             timestamp,
           };
         })
-        .filter((point): point is { time: string; price: number; timestamp: number } => Boolean(point))
+        .filter((point): point is ChartPoint => Boolean(point))
         .sort((a, b) => a.timestamp - b.timestamp);
 
       if (!historyPoints.length) {
@@ -55,7 +60,6 @@ export default function PerformanceChart() {
         };
       }
 
-      type ChartPoint = (typeof historyPoints)[number];
       const normalized = historyPoints;
 
       const latest = normalized[normalized.length - 1];

@@ -25,6 +25,7 @@ import TeamLogo from "@/components/shared/TeamLogo";
 import { formatCurrency, formatNumber, formatRange } from "@/lib/number-format";
 import { useTrade } from "@/hooks/usePortfolio";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 
 type RangeStats = { low: number; high: number };
 
@@ -33,6 +34,7 @@ type NormalizedTeam = {
   name: string;
   abbreviation: string;
   price: number;
+  instrumentType: "team" | "etf";
   value?: number;
   volume?: number;
   division: string;
@@ -61,14 +63,55 @@ const toOptionalNumber = (value: unknown) => {
 const priceUSD = (value: unknown) => toNumber(value) * PRICE_MULTIPLIER;
 const PLACEHOLDER = "\u2014";
 
+interface PricePoint {
+  timestamp: number;
+  price: number;
+}
+
+const extractSeries = (history: TeamMarketInformation[]) =>
+  history
+    .map((entry, index) => {
+      const timestamp = entry.timestamp ? new Date(entry.timestamp).getTime() : index;
+      const price = priceUSD(entry.value ?? entry.price);
+      return Number.isFinite(timestamp) && Number.isFinite(price)
+        ? { timestamp, price }
+        : null;
+    })
+    .filter((point): point is PricePoint => Boolean(point))
+    .sort((a, b) => a.timestamp - b.timestamp);
+
+const computeChangePercentFromSeries = (series: PricePoint[], windowMs?: number | null) => {
+  if (!series.length) return null;
+  const latest = series[series.length - 1];
+  const reference =
+    windowMs == null
+      ? series[0]
+      : [...series].reverse().find((point) => point.timestamp <= latest.timestamp - windowMs);
+  if (!reference || !reference.price) return null;
+  if (reference.price === 0) return null;
+  return ((latest.price - reference.price) / reference.price) * 100;
+};
+
+const computeRangeFromSeries = (series: PricePoint[], windowMs: number) => {
+  if (!series.length) return null;
+  const latest = series[series.length - 1];
+  const points = series.filter((point) => point.timestamp >= latest.timestamp - windowMs);
+  if (!points.length) return null;
+  return {
+    low: Math.min(...points.map((point) => point.price)),
+    high: Math.max(...points.map((point) => point.price)),
+  };
+};
+
 export default function Market() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const { data: teams, isLoading, isError, error } = useTeams();
-  const [selectedTeamName, setSelectedTeamName] = useState<string | null>(null);
+  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [chartRange, setChartRange] = useState<ChartRange>("1D");
   const [orderType, setOrderType] = useState<"buy" | "sell">("buy");
   const [quantity, setQuantity] = useState(1);
   const [pendingAction, setPendingAction] = useState<"buy" | "sell" | null>(null);
+  const [focusedPrice, setFocusedPrice] = useState<number | null>(null);
   const tradeMutation = useTrade();
   const { toast } = useToast();
 
@@ -131,11 +174,13 @@ export default function Market() {
     };
 
     return Array.from(grouped.entries())
-      .map(([name, entries], index) => {
+      .map(([name, entries]) => {
         const sorted = entries.sort((a, b) => a.timestampValue - b.timestampValue);
         const latest = sorted[sorted.length - 1];
         const previous = sorted[sorted.length - 2];
         const latestTs = latest?.timestampValue ?? Date.now();
+        const entryType = (latest?.instrumentType ?? "team") as "team" | "etf";
+        const divisionLabel = entryType === "etf" ? name : getTeamDivision(name);
 
         const baseValue = latest?.value ?? latest?.price;
         const price = priceUSD(baseValue);
@@ -147,13 +192,14 @@ export default function Market() {
         );
 
         return {
-          id: `${name}-${latest?.timestamp ?? index}`,
+          id: name,
           name,
           abbreviation: getTeamAbbreviation(name),
           price,
+          instrumentType: entryType,
           value: toOptionalNumber(latest?.value),
           volume: toOptionalNumber(latest?.volume),
-          division: getTeamDivision(name),
+          division: divisionLabel,
           timestamp: latest?.timestamp,
           changePercent: changeFrom(price, previous),
           weekChangePercent: changeFrom(price, weekRef),
@@ -166,15 +212,26 @@ export default function Market() {
   }, [teams]);
 
   useEffect(() => {
-    if (!selectedTeamName && normalizedTeams.length > 0) {
-      setSelectedTeamName(normalizedTeams[0].name);
+    if (!selectedTeamId && normalizedTeams.length > 0) {
+      setSelectedTeamId(normalizedTeams[0].id);
     }
-  }, [normalizedTeams, selectedTeamName]);
+  }, [normalizedTeams, selectedTeamId]);
+
+  useEffect(() => {
+    setFocusedPrice(null);
+  }, [selectedTeamId]);
 
   useEffect(() => {
     if (typeof window === "undefined" || !normalizedTeams.length) return;
-    const params = new URLSearchParams(window.location.search);
-    const requestedTeam = params.get("team");
+    const search = window.location.search ?? "";
+    if (!search) return;
+
+    const params = new URLSearchParams(search);
+    let requestedTeam =
+      params.get("team") ||
+      params.get("") ||
+      (search.startsWith("?=") ? decodeURIComponent(search.slice(2)) : null);
+
     if (!requestedTeam) return;
 
     const normalizedQuery = requestedTeam.toLowerCase();
@@ -184,21 +241,34 @@ export default function Market() {
       return city === normalizedQuery;
     });
 
-    if (match && match.name !== selectedTeamName) {
-      setSelectedTeamName(match.name);
+    if (match) {
+      setSelectedTeamId((current) => (current === match.id ? current : match.id));
     }
-  }, [location, normalizedTeams, selectedTeamName]);
+  }, [location, normalizedTeams]);
 
   const selectedTeam = useMemo(
-    () => normalizedTeams.find((team) => team.name === selectedTeamName) ?? null,
-    [normalizedTeams, selectedTeamName],
+    () => normalizedTeams.find((team) => team.id === selectedTeamId) ?? null,
+    [normalizedTeams, selectedTeamId],
   );
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !selectedTeam) return;
+    const meta = findTeamMetadata(selectedTeam.name);
+    const target = (meta?.city ?? selectedTeam.name).trim();
+    const query = `?=${encodeURIComponent(target)}`;
+    if (window.location.search === query) return;
+    const basePath = window.location.pathname || "/market";
+    setLocation(`${basePath}${query}`, { replace: true });
+  }, [selectedTeam, setLocation]);
 
   const { data: historyData, isLoading: isHistoryLoading } = useQuery({
     queryKey: ["team-history", selectedTeam?.name],
     queryFn: () => fetchTeamHistory(selectedTeam!.name),
     enabled: Boolean(selectedTeam?.name),
-    staleTime: 15000,
+    staleTime: 0,
+    refetchInterval: 5000,
+    refetchIntervalInBackground: true,
+    placeholderData: (previousData) => previousData,
   });
 
   const chartData = useMemo(() => {
@@ -249,6 +319,28 @@ export default function Market() {
     return filtered.length ? filtered : trimmedPoints.slice(-1);
   }, [historyData, selectedTeam, chartRange]);
 
+  const derivedMetrics = useMemo(() => {
+    if (!historyData || !historyData.length) return null;
+    const series = extractSeries(historyData);
+    if (!series.length) return null;
+    return {
+      currentPrice: series[series.length - 1]?.price ?? null,
+      changePercent: computeChangePercentFromSeries(series, null),
+      weekChangePercent: computeChangePercentFromSeries(series, WEEK_MS),
+      monthChangePercent: computeChangePercentFromSeries(series, MONTH_MS),
+      weekRange: computeRangeFromSeries(series, WEEK_MS),
+      monthRange: computeRangeFromSeries(series, MONTH_MS),
+    };
+  }, [historyData]);
+  const rangeChangePercent = useMemo(() => {
+    if (!chartData.length) return null;
+    const first = chartData[0];
+    const last = chartData[chartData.length - 1];
+    if (!first || !last || !first.price) return null;
+    if (first.price === 0) return null;
+    return ((last.price - first.price) / first.price) * 100;
+  }, [chartData]);
+
   const handleQuantityChange = (value: number) => {
     setQuantity(Math.max(1, Number.isFinite(value) ? value : 1));
   };
@@ -287,6 +379,26 @@ export default function Market() {
     );
   };
 
+  const selectedStats = selectedTeam
+    ? {
+        lastPrice: derivedMetrics?.currentPrice ?? selectedTeam.price,
+        changePercent: derivedMetrics?.changePercent ?? selectedTeam.changePercent,
+        weekChangePercent:
+          derivedMetrics?.weekChangePercent ?? selectedTeam.weekChangePercent,
+        monthChangePercent:
+          derivedMetrics?.monthChangePercent ?? selectedTeam.monthChangePercent,
+        weekRange: derivedMetrics?.weekRange ?? selectedTeam.weekRange,
+        monthRange: derivedMetrics?.monthRange ?? selectedTeam.monthRange,
+        volume: selectedTeam.volume,
+        timestamp: selectedTeam.timestamp,
+      }
+    : null;
+  const displayedPrice =
+    focusedPrice ??
+    selectedStats?.lastPrice ??
+    selectedTeam?.price ??
+    0;
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -313,17 +425,30 @@ export default function Market() {
                     Select Ticker
                   </Label>
                   <Select
-                    value={selectedTeamName ?? undefined}
-                    onValueChange={(value) => setSelectedTeamName(value)}
+                    value={selectedTeamId ?? undefined}
+                    onValueChange={(value) => setSelectedTeamId(value)}
                     disabled={!normalizedTeams.length}
                   >
                     <SelectTrigger id="team-select">
-                      <SelectValue placeholder="Choose a team" />
+                      <SelectValue placeholder="Choose a team">
+                        {selectedTeam?.abbreviation
+                          ? `${selectedTeam.abbreviation} — ${selectedTeam.name}`
+                          : undefined}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {normalizedTeams.map((team) => (
-                        <SelectItem key={team.id} value={team.name}>
-                          {team.abbreviation} &mdash; {team.name}
+                        <SelectItem key={team.id} value={team.id}>
+                          <div className="flex items-center justify-between gap-3">
+                            <span>
+                              {team.abbreviation} &mdash; {team.name}
+                            </span>
+                            {team.instrumentType === "etf" && (
+                              <Badge variant="outline" className="text-[10px] uppercase tracking-wide">
+                                ETF
+                              </Badge>
+                            )}
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -338,7 +463,14 @@ export default function Market() {
                       size="md"
                     />
                     <div>
-                      <p className="text-sm font-semibold">{selectedTeam.name}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-semibold">{selectedTeam.name}</p>
+                        {selectedTeam.instrumentType === "etf" && (
+                          <Badge variant="outline" className="text-[10px] uppercase tracking-widest">
+                            ETF
+                          </Badge>
+                        )}
+                      </div>
                       <p className="text-xs text-muted-foreground">{selectedTeam.division}</p>
                     </div>
                   </div>
@@ -354,9 +486,18 @@ export default function Market() {
                     data={chartData}
                     range={chartRange}
                     onRangeChange={setChartRange}
-                    price={selectedTeam.price}
-                    weekChangePercent={selectedTeam.weekChangePercent}
-                    monthChangePercent={selectedTeam.monthChangePercent}
+                    price={selectedStats?.lastPrice ?? selectedTeam.price}
+                    weekChangePercent={
+                      derivedMetrics?.weekChangePercent ?? selectedTeam.weekChangePercent
+                    }
+                    monthChangePercent={
+                      derivedMetrics?.monthChangePercent ?? selectedTeam.monthChangePercent
+                    }
+                    rangeChangePercent={rangeChangePercent}
+                    allChangePercent={selectedStats?.changePercent}
+                    onFocusPointChange={(point) => {
+                      setFocusedPrice(point?.price ?? selectedStats?.lastPrice ?? selectedTeam.price);
+                    }}
                   />
                 )
               ) : (
@@ -379,7 +520,7 @@ export default function Market() {
                     <div className="text-right">
                       <p className="text-xs text-muted-foreground uppercase">Last Price</p>
                       <p className="text-xl font-semibold">
-                        {formatCurrency(selectedTeam.price)}
+                        {formatCurrency(displayedPrice)}
                       </p>
                     </div>
                   )}
@@ -401,7 +542,7 @@ export default function Market() {
                       onQuantityChange={handleQuantityChange}
                       onSubmit={() => handleTradeSubmit("buy")}
                       totalLabel={formatCurrency(
-                        selectedTeam ? selectedTeam.price * quantity : 0,
+                        selectedTeam ? displayedPrice * quantity : 0,
                       )}
                       disabled={!selectedTeam}
                       isSubmitting={pendingAction === "buy" && tradeMutation.isPending}
@@ -414,7 +555,7 @@ export default function Market() {
                       onQuantityChange={handleQuantityChange}
                       onSubmit={() => handleTradeSubmit("sell")}
                       totalLabel={formatCurrency(
-                        selectedTeam ? selectedTeam.price * quantity : 0,
+                        selectedTeam ? displayedPrice * quantity : 0,
                       )}
                       disabled={!selectedTeam}
                       isSubmitting={pendingAction === "sell" && tradeMutation.isPending}
@@ -427,26 +568,30 @@ export default function Market() {
                 <Card className="p-4">
                   <div className="space-y-3 text-sm">
                     <StatRow
+                      label="Instrument"
+                      value={selectedTeam.instrumentType === "etf" ? "Division ETF" : "Team"}
+                    />
+                    <StatRow
                       label="All-time Change"
-                      value={formatPercent(selectedTeam.changePercent)}
+                      value={formatPercent(selectedStats?.changePercent)}
                       intent={
-                        (selectedTeam.changePercent ?? 0) >= 0 ? "positive" : "negative"
+                        (selectedStats?.changePercent ?? 0) >= 0 ? "positive" : "negative"
                       }
                     />
                     <StatRow
                       label="1W Change"
-                      value={formatPercent(selectedTeam.weekChangePercent)}
+                      value={formatPercent(selectedStats?.weekChangePercent)}
                       intent={
-                        (selectedTeam.weekChangePercent ?? 0) >= 0
+                        (selectedStats?.weekChangePercent ?? 0) >= 0
                           ? "positive"
                           : "negative"
                       }
                     />
                     <StatRow
                       label="1M Change"
-                      value={formatPercent(selectedTeam.monthChangePercent)}
+                      value={formatPercent(selectedStats?.monthChangePercent)}
                       intent={
-                        (selectedTeam.monthChangePercent ?? 0) >= 0
+                        (selectedStats?.monthChangePercent ?? 0) >= 0
                           ? "positive"
                           : "negative"
                       }
@@ -454,10 +599,10 @@ export default function Market() {
                     <StatRow
                       label="1W Range"
                       value={
-                        selectedTeam.weekRange
+                        selectedStats?.weekRange
                           ? formatRange(
-                              selectedTeam.weekRange.low,
-                              selectedTeam.weekRange.high,
+                              selectedStats.weekRange.low,
+                              selectedStats.weekRange.high,
                               (val) => formatCurrency(val, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
                             )
                           : PLACEHOLDER
@@ -466,10 +611,10 @@ export default function Market() {
                     <StatRow
                       label="1M Range"
                       value={
-                        selectedTeam.monthRange
+                        selectedStats?.monthRange
                           ? formatRange(
-                              selectedTeam.monthRange.low,
-                              selectedTeam.monthRange.high,
+                              selectedStats.monthRange.low,
+                              selectedStats.monthRange.high,
                               (val) => formatCurrency(val, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
                             )
                           : PLACEHOLDER
@@ -477,15 +622,19 @@ export default function Market() {
                     />
                     <StatRow
                       label="Volume"
-                      value={formatNumber(selectedTeam.volume, {
-                        maximumFractionDigits: 0,
-                      })}
+                      value={
+                        selectedStats?.volume !== undefined && selectedStats?.volume !== null
+                          ? formatNumber(selectedStats.volume, {
+                              maximumFractionDigits: 0,
+                            })
+                          : PLACEHOLDER
+                      }
                     />
                     <StatRow
                       label="Updated"
                       value={
-                        selectedTeam.timestamp
-                          ? new Date(selectedTeam.timestamp).toLocaleString()
+                        selectedStats?.timestamp
+                          ? new Date(selectedStats.timestamp).toLocaleString()
                           : PLACEHOLDER
                       }
                     />

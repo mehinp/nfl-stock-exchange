@@ -22,7 +22,7 @@ export default function Portfolio() {
   const snapshot = buildPortfolioSnapshot(
     portfolioData,
     teams,
-    portfolioHistory?.history ?? [],
+    portfolioHistory,
   );
 
   const holdingsLoading = isPortfolioLoading || isTeamsLoading;

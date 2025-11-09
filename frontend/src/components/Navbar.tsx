@@ -55,7 +55,7 @@ export default function Navbar() {
                 decoding="async"
               />
               <span className="text-primary font-mono text-lg tracking-tight">
-                NFLXchange
+                NFLSE
               </span>
             </Link>
             

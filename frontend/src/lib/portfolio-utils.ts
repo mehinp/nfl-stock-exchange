@@ -5,6 +5,7 @@ import type {
   PortfolioTrade,
   PortfolioPosition,
   PortfolioLiveHistoryPoint,
+  PortfolioLiveHistoryResponse,
 } from "@/lib/api";
 
 const PRICE_MULTIPLIER = 1;
@@ -16,6 +17,16 @@ const DEFAULT_INITIAL_DEPOSIT = 10000;
 const toNumber = (value: unknown, fallback = 0) => {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+const parseMaybeNumber = (value: unknown, fallback = NaN) => {
+  if (value === null || value === undefined) return fallback;
+  if (typeof value === "string") {
+    const normalized = value.replace(/[$,\s]/g, "");
+    if (!normalized) return fallback;
+    return toNumber(normalized, fallback);
+  }
+  return toNumber(value, fallback);
 };
 
 const priceUSD = (value: unknown) => toNumber(value) * PRICE_MULTIPLIER;
@@ -533,10 +544,12 @@ const buildHoldingsPerformanceHistory = (
   });
 };
 
+type HistorySource = PortfolioLiveHistoryResponse | PortfolioLiveHistoryPoint[] | undefined;
+
 export function buildPortfolioSnapshot(
   portfolio: PortfolioResponse | undefined,
   marketTeams: TeamMarketInformation[] | undefined,
-  history?: PortfolioLiveHistoryPoint[],
+  historySource?: HistorySource,
 ): PortfolioSnapshot {
   if (!portfolio) {
     return {
@@ -554,8 +567,16 @@ export function buildPortfolioSnapshot(
     };
   }
 
+  const historyPoints = Array.isArray(historySource)
+    ? historySource
+    : historySource?.history ?? [];
+
+  const historyInitialDeposit = Array.isArray(historySource)
+    ? NaN
+    : parseMaybeNumber(historySource?.initial_deposit, NaN);
+
   const parsedHistory =
-    history
+    historyPoints
       ?.map((point) => {
         const timestamp = parsePortfolioDate(point.timestamp).getTime();
         const balance = toNumber(point.balance, NaN);
@@ -568,14 +589,25 @@ export function buildPortfolioSnapshot(
 
   const latestHistoryPoint = parsedHistory.at(-1);
 
-  const fallbackCashBalance = toNumber(portfolio.balance);
+  const reportedCashBalance = parseMaybeNumber(
+    portfolio.balance ??
+      portfolio.cash_balance ??
+      (portfolio as { cashBalance?: unknown }).cashBalance,
+    NaN,
+  );
+  const hasReportedCashBalance = Number.isFinite(reportedCashBalance);
+  const baselineCashBalance = hasReportedCashBalance ? reportedCashBalance : 0;
   const metrics = computeTeamMetrics(marketTeams);
   const tradeSource =
     portfolio.trades && portfolio.trades.length > 0
       ? portfolio.trades
       : deriveTradesFromPositions(portfolio.positions);
   const trades = normalizeTrades(tradeSource);
-  const reportedInitialDeposit = toNumber(portfolio.initial_deposit, NaN);
+  const reportedInitialDeposit = parseMaybeNumber(
+    portfolio.initial_deposit ??
+      (portfolio as { initialDeposit?: unknown }).initialDeposit,
+    NaN,
+  );
 
   const holdings: EnrichedHolding[] = portfolio.positions
     .filter((position) => position.quantity > 0)
@@ -614,29 +646,57 @@ export function buildPortfolioSnapshot(
 
   const holdingsValue = holdings.reduce((sum, holding) => sum + holding.totalValue, 0);
   const totalCost = holdings.reduce((sum, holding) => sum + holding.totalCost, 0);
-  const totalUnrealizedPnL = toNumber(
+  let totalUnrealizedPnL = toNumber(
     portfolio.total_unrealized_pnl,
     holdings.reduce((sum, holding) => sum + (holding.totalValue - holding.totalCost), 0),
   );
 
-  let totalValue = holdingsValue + fallbackCashBalance;
-  let cashBalance = fallbackCashBalance;
+  const historyBalance = latestHistoryPoint?.balance ?? NaN;
+  const reportedAccountValue = toNumber(portfolio.total_value, NaN);
 
-  if (latestHistoryPoint && Number.isFinite(latestHistoryPoint.balance)) {
-    totalValue = latestHistoryPoint.balance;
-    cashBalance = totalValue - holdingsValue;
+  let totalValue = Number.isFinite(historyBalance)
+    ? historyBalance
+    : Number.isFinite(reportedAccountValue)
+      ? reportedAccountValue
+      : holdingsValue + baselineCashBalance;
+
+  let cashBalance = totalValue - holdingsValue;
+
+  if (!Number.isFinite(cashBalance)) {
+    cashBalance = baselineCashBalance;
+    totalValue = holdingsValue + cashBalance;
   }
 
-  if (!Number.isFinite(cashBalance)) cashBalance = 0;
-  if (cashBalance < 0 && Math.abs(cashBalance) < 0.01) cashBalance = 0;
+  if (cashBalance < 0 && Math.abs(cashBalance) < 0.01) {
+    cashBalance = 0;
+  }
 
-  const inferredInitialDeposit = computeInitialDeposit(cashBalance, trades);
+  const derivedInitialDepositFromBalance =
+    Number.isFinite(cashBalance) && Number.isFinite(totalCost)
+      ? cashBalance + totalCost
+      : NaN;
+  const inferredInitialDeposit = computeInitialDeposit(
+    Number.isFinite(cashBalance) ? cashBalance : baselineCashBalance,
+    trades,
+  );
+
   const initialDeposit =
     Number.isFinite(reportedInitialDeposit) && reportedInitialDeposit > 0
       ? reportedInitialDeposit
-      : inferredInitialDeposit > 0
-        ? inferredInitialDeposit
-        : DEFAULT_INITIAL_DEPOSIT;
+      : Number.isFinite(historyInitialDeposit) && historyInitialDeposit > 0
+        ? historyInitialDeposit
+        : Number.isFinite(derivedInitialDepositFromBalance) && derivedInitialDepositFromBalance > 0
+          ? derivedInitialDepositFromBalance
+          : inferredInitialDeposit > 0
+            ? inferredInitialDeposit
+            : DEFAULT_INITIAL_DEPOSIT;
+
+  const latestBalanceForPnL = Number.isFinite(latestHistoryPoint?.balance)
+    ? latestHistoryPoint!.balance
+    : totalValue;
+  totalUnrealizedPnL = Number.isFinite(latestBalanceForPnL)
+    ? latestBalanceForPnL - initialDeposit
+    : 0;
 
   const holdingsHistory = buildHoldingsPerformanceHistory(trades, holdings, marketTeams);
   const chartPoints =
@@ -652,15 +712,23 @@ export function buildPortfolioSnapshot(
   const latestPoint = chartPoints[chartPoints.length - 1];
   const latestTimestamp = latestPoint?.timestamp ?? now;
   const referenceThreshold = latestTimestamp - DAY_MS;
-  const referencePoint =
+  const resolvedReferencePoint =
     [...chartPoints]
       .reverse()
       .find((point) => (point.timestamp ?? 0) <= referenceThreshold) ?? latestPoint;
 
+  const referenceValue =
+    resolvedReferencePoint && resolvedReferencePoint !== latestPoint
+      ? resolvedReferencePoint.value
+      : initialDeposit;
+
+  const fallbackReference = Number.isFinite(referenceValue) ? referenceValue! : null;
   const fallbackDayChangeValue =
-    latestPoint && referencePoint ? latestPoint.value - referencePoint.value : 0;
+    latestPoint && fallbackReference !== null ? latestPoint.value - fallbackReference : 0;
   const fallbackDayChangePercent =
-    referencePoint && referencePoint.value > 0 ? (fallbackDayChangeValue / referencePoint.value) * 100 : 0;
+    fallbackReference !== null && fallbackReference !== 0
+      ? (fallbackDayChangeValue / fallbackReference) * 100
+      : 0;
 
   let dayChangeValue = fallbackDayChangeValue;
   let dayChangePercent = fallbackDayChangePercent;
@@ -676,9 +744,9 @@ export function buildPortfolioSnapshot(
         referenceHistoryPoint.balance !== 0
           ? (dayChangeValue / referenceHistoryPoint.balance) * 100
           : 0;
-    } else {
-      dayChangeValue = 0;
-      dayChangePercent = 0;
+    } else if (initialDeposit !== 0) {
+      dayChangeValue = latestHistoryPoint.balance - initialDeposit;
+      dayChangePercent = (dayChangeValue / initialDeposit) * 100;
     }
   }
 

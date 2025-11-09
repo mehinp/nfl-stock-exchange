@@ -146,7 +146,7 @@ export default function Onboarding() {
         email: signUpForm.email,
         password: signUpForm.password,
         confirm_password: signUpForm.confirmPassword,
-        initial_deposit: depositValue,
+        balance: depositValue,
       });
       setSignUpMessage("Looks great! Redirecting you to your dashboard...");
       setTimeout(() => navigate("/dashboard"), 600);

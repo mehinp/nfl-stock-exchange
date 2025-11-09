@@ -1,10 +1,10 @@
-const DEFAULT_API_URL = "https://margo-unamicable-unmaterially.ngrok-free.dev";
-const API_URL = (import.meta.env.VITE_API_URL || DEFAULT_API_URL).replace(/\/+$/, "");
+const DEFAULT_API_URL = "https://nflse-backend.up.railway.app";
+export const API_URL = (import.meta.env.VITE_API_URL || DEFAULT_API_URL).replace(/\/+$/, "");
 const AUTH_TOKEN_KEY = "nflxchange.token";
 const AUTH_USER_ID_KEY = "nflxchange.userId";
 const AUTH_USER_EMAIL_KEY = "nflxchange.userEmail";
 
-const buildUrl = (path: string) => `${API_URL}${path.startsWith("/") ? path : `/${path}`}`;
+export const buildUrl = (path: string) => `${API_URL}${path.startsWith("/") ? path : `/${path}`}`;
 
 const isBrowser = typeof window !== "undefined";
 export const SESSION_EVENT = "nflxchange:session";
@@ -90,31 +90,105 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return (parseJson() as T) ?? ({} as T);
 }
 
+export type MarketInstrumentType = "team" | "etf";
+
 export interface TeamMarketInformation {
   team_name: string;
   price: number;
-  value: number;
-  volume: number;
-  timestamp: string;
+  value?: number;
+  volume?: number;
+  timestamp?: string;
+  instrumentType?: MarketInstrumentType;
 }
 
-export function fetchTeams() {
-  return request<TeamMarketInformation[]>("/market/all-teams");
+type RawInstrument = {
+  team_name: string;
+  value?: number | string | null;
+  price?: number | string | null;
+  volume?: number | string | null;
+  timestamp?: string;
+  type?: string | null;
+};
+
+type TeamListApiResponse =
+  | RawInstrument[]
+  | {
+      teams?: RawInstrument[] | null;
+      etfs?: RawInstrument[] | null;
+      data?: RawInstrument[] | null;
+    }
+  | null
+  | undefined;
+
+const parseNumeric = (value: unknown): number | undefined => {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) return undefined;
+    const parsed = Number(trimmed);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+  if (typeof value === "bigint") {
+    return Number(value);
+  }
+  return undefined;
+};
+
+const normalizeInstrument = (
+  entry: RawInstrument,
+  fallbackType: MarketInstrumentType = "team",
+): TeamMarketInformation => {
+  const numericValue = parseNumeric(entry.value ?? entry.price);
+  const numericPrice = parseNumeric(entry.price ?? entry.value) ?? numericValue;
+  const numericVolume = parseNumeric(entry.volume);
+  const resolvedType =
+    entry.type && entry.type.toLowerCase() === "etf"
+      ? "etf"
+      : fallbackType;
+
+  return {
+    team_name: entry.team_name,
+    value: numericValue ?? numericPrice ?? 0,
+    price: numericPrice ?? numericValue ?? 0,
+    volume: numericVolume,
+    timestamp: entry.timestamp ?? "",
+    instrumentType: resolvedType,
+  };
+};
+
+const normalizeInstrumentList = (
+  payload: TeamListApiResponse,
+  fallbackType: MarketInstrumentType = "team",
+): TeamMarketInformation[] => {
+  if (!payload) return [];
+  if (Array.isArray(payload)) {
+    return payload.map((entry) => normalizeInstrument(entry, fallbackType));
+  }
+  if (typeof payload === "object") {
+    const baseArray = Array.isArray(payload.teams)
+      ? payload.teams
+      : Array.isArray(payload.data)
+        ? payload.data
+        : [];
+    const etfArray = Array.isArray(payload.etfs) ? payload.etfs : [];
+    return [
+      ...baseArray.map((entry) => normalizeInstrument(entry, "team")),
+      ...etfArray.map((entry) => normalizeInstrument(entry, "etf")),
+    ];
+  }
+  return [];
+};
+
+export async function fetchTeams() {
+  const response = await request<TeamListApiResponse>("/market/all-teams");
+  return normalizeInstrumentList(response, "team");
 }
 
-export function fetchTeamHistory(teamName: string) {
-  return request<TeamMarketInformation[]>(`/market/team/${encodeURIComponent(teamName)}`);
+export async function fetchTeamHistory(teamName: string) {
+  const response = await request<TeamListApiResponse>(`/market/team/${encodeURIComponent(teamName)}`);
+  return normalizeInstrumentList(response, "team");
 }
 
-export type LiveGameResponse = Record<string, unknown>;
-
-export function fetchLiveGames() {
-  return request<LiveGameResponse[]>("/live/games");
-}
-
-export function fetchLiveGameById(id: string) {
-  return request<LiveGameResponse>(`/live/games/${encodeURIComponent(id)}`);
-}
 
 export interface AuthResponse {
   success: boolean;
@@ -127,7 +201,7 @@ interface SignupPayload {
   email: string;
   password: string;
   confirm_password: string;
-  initial_deposit: number;
+  balance: number;
 }
 
 interface LoginPayload {
@@ -223,7 +297,10 @@ export interface PortfolioResponse {
   total_value: string;
   total_unrealized_pnl: string;
   balance?: string;
+  cash_balance?: string;
+  cashBalance?: string;
   initial_deposit?: string;
+  initialDeposit?: string;
   trades?: PortfolioTrade[];
 }
 
@@ -239,6 +316,23 @@ export interface PortfolioLiveHistoryPoint {
 export interface PortfolioLiveHistoryResponse {
   user_id: number;
   history: PortfolioLiveHistoryPoint[];
+  initial_deposit?: string;
+  current_cash_balance?: string;
+  current_total_account_value?: string;
+}
+
+export interface PortfolioRecomputedHistoryPoint {
+  timestamp: string;
+  current_total_account_value: string;
+  current_cash_balance: string;
+  initial_deposit: string;
+  cost_basis: string;
+  pnl: string;
+}
+
+export interface PortfolioRecomputedHistoryResponse {
+  user_id: number;
+  history: PortfolioRecomputedHistoryPoint[];
 }
 
 export interface PortfolioCurrentBalance {
@@ -253,4 +347,8 @@ export function fetchPortfolioHistory() {
 
 export function fetchPortfolioCurrentBalance() {
   return request<PortfolioCurrentBalance>("/trades/portfolio/history/current");
+}
+
+export function fetchPortfolioHistoryRecomputed() {
+  return request<PortfolioRecomputedHistoryResponse>("/trades/portfolio/history/recomputed");
 }

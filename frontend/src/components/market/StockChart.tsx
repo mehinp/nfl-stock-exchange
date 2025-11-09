@@ -14,6 +14,7 @@ import {
   YAxis,
 } from "recharts";
 import { usePriceFlash } from "@/hooks/usePriceFlash";
+import { cn } from "@/lib/utils";
 import {
   ChartRange,
   CHART_RANGE_SEQUENCE,
@@ -35,6 +36,9 @@ interface StockChartProps {
   weekChangePercent?: number | null;
   monthChangePercent?: number | null;
   priceDomain?: [number, number];
+  rangeChangePercent?: number | null;
+  allChangePercent?: number | null;
+  onFocusPointChange?: (point: { price: number; timestamp?: number | null } | null) => void;
 }
 
 const CHART_MARGINS = { top: 20, right: 24, bottom: 24, left: 12 };
@@ -97,6 +101,9 @@ export default function StockChart({
   weekChangePercent,
   monthChangePercent,
   priceDomain,
+  rangeChangePercent,
+  allChangePercent,
+  onFocusPointChange,
 }: StockChartProps) {
   const gradientId = useMemo(
     () => `grad-${Math.random().toString(36).slice(2)}`,
@@ -115,6 +122,14 @@ export default function StockChart({
   const timeFlash = usePriceFlash(display?.timestamp ?? 0);
   const weekFlash = usePriceFlash(weekChangePercent ?? 0);
   const monthFlash = usePriceFlash(monthChangePercent ?? 0);
+
+  const latestIndex = data.length - 1;
+  const latestPoint = latestIndex >= 0 ? data[latestIndex] : null;
+  const formatPointPrice = (point?: DataPoint | null) => (point ? formatPrice(point.price) : null);
+  const formatPointTime = (point?: DataPoint | null) =>
+    point ? formatDisplayTimestamp(range, point.timestamp ?? null, point.time) : null;
+  const latestPriceLabel = formatPointPrice(latestPoint);
+  const latestTimeLabel = formatPointTime(latestPoint);
 
   const chartRef = useRef<HTMLDivElement | null>(null);
 
@@ -206,6 +221,24 @@ export default function StockChart({
     setDragging(false);
   };
 
+  useEffect(() => {
+    const overlayPoint = active && !isDragging ? active : latestPoint;
+    if (!onFocusPointChange) return;
+    if (overlayPoint) {
+      onFocusPointChange({
+        price: overlayPoint.price,
+        timestamp: overlayPoint.timestamp ?? null,
+      });
+    } else if (latestPoint) {
+      onFocusPointChange({
+        price: latestPoint.price,
+        timestamp: latestPoint.timestamp ?? null,
+      });
+    } else {
+      onFocusPointChange(null);
+    }
+  }, [active, isDragging, latestPoint, onFocusPointChange]);
+
   return (
     <Card className="p-6">
       <div className="flex flex-col gap-6">
@@ -223,35 +256,40 @@ export default function StockChart({
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-4">
-            <div>
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                1W
-              </p>
-              <p
-                className={`font-medium ${
-                  (weekChangePercent ?? 0) >= 0
-                    ? "text-success"
-                    : "text-destructive"
-                } ${weekFlash}`}
-              >
-                {formatPercent(weekChangePercent)}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                1M
-              </p>
-              <p
-                className={`font-medium ${
-                  (monthChangePercent ?? 0) >= 0
-                    ? "text-success"
-                    : "text-destructive"
-                } ${monthFlash}`}
-              >
-                {formatPercent(monthChangePercent)}
-              </p>
-            </div>
+          <div className="grid grid-cols-2 gap-4 text-right sm:text-left sm:flex sm:flex-wrap">
+            {[
+              {
+                label: "1W",
+                value: weekChangePercent,
+                flash: weekFlash,
+              },
+              {
+                label: "1M",
+                value: monthChangePercent,
+                flash: monthFlash,
+              },
+              {
+                label: "Change",
+                value: rangeChangePercent,
+              },
+              {
+                label: "All-time",
+                value: allChangePercent,
+              },
+            ].map(({ label, value, flash }) => (
+              <div key={label}>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
+                <p
+                  className={cn(
+                    "font-medium",
+                    (value ?? 0) >= 0 ? "text-success" : "text-destructive",
+                    flash,
+                  )}
+                >
+                  {formatPercent(value)}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -346,58 +384,165 @@ export default function StockChart({
 
                     const scaleX = xAxis.scale;
                     const scaleY = yAxis?.scale;
-                    const getX = (ts?: number | null) => scaleX(ts ?? 0);
+                    const getX = (ts?: number | null, fallbackIndex = 0) => scaleX(ts ?? fallbackIndex);
                     const getY = (p: number) => (scaleY ? scaleY(p) : 0);
+                    const findPointIndex = (point?: DataPoint | null) => {
+                      if (!point) return -1;
+                      return data.findIndex(
+                        (d) => d.timestamp === point.timestamp && d.price === point.price,
+                      );
+                    };
+                    const resolveX = (point?: DataPoint | null) => {
+                      if (!point) return null;
+                      const idx = findPointIndex(point);
+                      const fallbackIndex = idx === -1 ? data.length - 1 : idx;
+                      return getX(point.timestamp, fallbackIndex);
+                    };
 
                     const elems: ReactNode[] = [];
 
-                    // Selection shading
                     if (selection && hasDragged) {
-                      const x1 = getX(selection.start.timestamp);
-                      const x2 = getX(selection.end.timestamp);
-                      const w = Math.abs(x2 - x1);
-                      if (w > 3) {
+                      const startX = resolveX(selection.start);
+                      const endX = resolveX(selection.end);
+                      if (startX != null && endX != null) {
+                        const w = Math.abs(endX - startX);
+                        if (w > 3) {
+                          elems.push(
+                            <rect
+                              key="selection"
+                              x={Math.min(startX, endX)}
+                              y={CHART_MARGINS.top}
+                              width={w}
+                              height={
+                                chartSize.height -
+                                CHART_MARGINS.top -
+                                CHART_MARGINS.bottom
+                              }
+                              fill="rgba(255,255,255,0.08)"
+                            />
+                          );
+                        }
+                      }
+                    }
+
+                    if (active?.timestamp != null && !isDragging) {
+                      const activeX = resolveX(active);
+                      if (activeX != null) {
+                        const y = getY(active.price);
                         elems.push(
-                          <rect
-                            key="selection"
-                            x={Math.min(x1, x2)}
-                            y={CHART_MARGINS.top}
-                            width={w}
-                            height={
-                              chartSize.height -
-                              CHART_MARGINS.top -
-                              CHART_MARGINS.bottom
-                            }
-                            fill="rgba(255,255,255,0.08)"
+                          <line
+                            key="cross-v"
+                            x1={activeX}
+                            x2={activeX}
+                            y1={CHART_MARGINS.top}
+                            y2={chartSize.height - CHART_MARGINS.bottom}
+                            stroke="rgba(255,255,255,0.6)"
+                            strokeDasharray="2 2"
+                          />,
+                          <line
+                            key="cross-h"
+                            x1={CHART_MARGINS.left}
+                            x2={chartSize.width - CHART_MARGINS.right}
+                            y1={y}
+                            y2={y}
+                            stroke="rgba(255,255,255,0.4)"
+                            strokeDasharray="2 2"
                           />
                         );
                       }
                     }
 
-                    // Crosshair
-                    if (active?.timestamp != null && !isDragging) {
-                      const x = getX(active.timestamp);
-                      const y = getY(active.price);
+                    const overlayPoint = active && !isDragging ? active : latestPoint;
+                    const overlayX = resolveX(overlayPoint);
+
+                    if (overlayPoint && overlayX != null && scaleY) {
+                      const overlayPrice = formatPointPrice(overlayPoint) ?? latestPriceLabel;
+                      const overlayTime = formatPointTime(overlayPoint) ?? latestTimeLabel;
+                      const overlayY = getY(overlayPoint.price);
+                      const priceLabelWidth = Math.max((overlayPrice?.length ?? 0) * 8 + 16, 72);
+                      const priceLabelHeight = 22;
+                      const priceLabelX = CHART_MARGINS.left;
+                      const priceLabelY = Math.min(
+                        Math.max(overlayY - priceLabelHeight / 2, CHART_MARGINS.top),
+                        chartSize.height - CHART_MARGINS.bottom - priceLabelHeight,
+                      );
+                      const accentColor = overlayPoint === latestPoint ? "rgba(125,211,252,0.6)" : "rgba(56,189,248,0.85)";
+
                       elems.push(
                         <line
-                          key="cross-v"
-                          x1={x}
-                          x2={x}
-                          y1={CHART_MARGINS.top}
-                          y2={chartSize.height - CHART_MARGINS.bottom}
-                          stroke="rgba(255,255,255,0.6)"
-                          strokeDasharray="2 2"
-                        />,
-                        <line
-                          key="cross-h"
+                          key="overlay-price-line"
                           x1={CHART_MARGINS.left}
                           x2={chartSize.width - CHART_MARGINS.right}
-                          y1={y}
-                          y2={y}
-                          stroke="rgba(255,255,255,0.4)"
-                          strokeDasharray="2 2"
-                        />
+                          y1={overlayY}
+                          y2={overlayY}
+                          stroke={accentColor}
+                          strokeDasharray="4 4"
+                        />,
+                        <g key="overlay-price-label">
+                          <rect
+                            x={priceLabelX}
+                            y={priceLabelY}
+                            width={priceLabelWidth}
+                            height={priceLabelHeight}
+                            rx={6}
+                            fill="rgba(15,23,42,0.9)"
+                            stroke={accentColor}
+                          />
+                          <text
+                            x={priceLabelX + priceLabelWidth / 2}
+                            y={priceLabelY + priceLabelHeight / 2 + 4}
+                            fill="#e2e8f0"
+                            textAnchor="middle"
+                            fontSize="12"
+                            fontFamily="var(--font-mono, monospace)"
+                          >
+                            {overlayPrice}
+                          </text>
+                        </g>
                       );
+
+                      if (overlayTime) {
+                        const timeLabelWidth = Math.max(overlayTime.length * 7 + 20, 90);
+                        const timeLabelHeight = 20;
+                        const timeLabelX = Math.min(
+                          Math.max(overlayX - timeLabelWidth / 2, CHART_MARGINS.left),
+                          chartSize.width - CHART_MARGINS.right - timeLabelWidth,
+                        );
+                        const timeLabelY = chartSize.height - CHART_MARGINS.bottom + 6;
+
+                        elems.push(
+                          <line
+                            key="overlay-time-line"
+                            x1={overlayX}
+                            x2={overlayX}
+                            y1={CHART_MARGINS.top}
+                            y2={chartSize.height - CHART_MARGINS.bottom}
+                            stroke={accentColor}
+                            strokeDasharray="4 4"
+                          />,
+                          <g key="overlay-time-label">
+                            <rect
+                              x={timeLabelX}
+                              y={timeLabelY}
+                              width={timeLabelWidth}
+                              height={timeLabelHeight}
+                              rx={6}
+                              fill="rgba(15,23,42,0.9)"
+                              stroke={accentColor}
+                            />
+                            <text
+                              x={timeLabelX + timeLabelWidth / 2}
+                              y={timeLabelY + timeLabelHeight / 2 + 4}
+                              fill="#e2e8f0"
+                              textAnchor="middle"
+                              fontSize="11"
+                              fontFamily="var(--font-mono, monospace)"
+                            >
+                              {overlayTime}
+                            </text>
+                          </g>
+                        );
+                      }
                     }
 
                     return <g>{elems}</g>;

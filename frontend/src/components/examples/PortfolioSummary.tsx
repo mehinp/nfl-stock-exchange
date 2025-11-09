@@ -9,6 +9,8 @@ export default function PortfolioSummaryExample() {
         dayChangePercent={3.56}
         cashBalance={5432.10}
         holdingsCount={8}
+        totalPnL={2543.20}
+        initialDeposit={10000}
       />
     </div>
   );

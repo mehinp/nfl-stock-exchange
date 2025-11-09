@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Navbar from "@/components/Navbar";
 import PortfolioSummary from "@/components/dashboard/PortfolioSummary";
 import TrendingTeams from "@/components/dashboard/TrendingTeams";
@@ -10,6 +10,7 @@ import { useMarketNavigation } from "@/hooks/useMarketNavigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getTeamAbbreviation } from "@/lib/utils";
 import type { TeamMarketInformation } from "@/lib/api";
+import { fetchTeamHistory } from "@/lib/api";
 import { usePortfolio } from "@/hooks/usePortfolio";
 import { buildPortfolioSnapshot } from "@/lib/portfolio-utils";
 import { usePortfolioValueHistory } from "@/hooks/usePortfolioValueHistory";
@@ -24,68 +25,59 @@ const toNumber = (value: unknown, fallback = 0) => {
 
 const priceUSD = (value: unknown) => toNumber(value) * PRICE_MULTIPLIER;
 
+const normalizeTimestamp = (timestamp?: string) => {
+  if (!timestamp) return NaN;
+  const time = new Date(timestamp).getTime();
+  return Number.isFinite(time) ? time : NaN;
+};
+
+const pickWeekReferencePrice = (history: TeamMarketInformation[]): number | null => {
+  if (!history.length) return null;
+  const enriched = history
+    .map((entry, index) => ({
+      ...entry,
+      timestampValue: normalizeTimestamp(entry.timestamp) || index,
+    }))
+    .sort((a, b) => a.timestampValue - b.timestampValue);
+
+  const latest = enriched[enriched.length - 1];
+  const latestPrice = priceUSD(latest.value ?? latest.price);
+  const latestTs = latest.timestampValue || Date.now();
+  const threshold = latestTs - WEEK_MS;
+  const reference =
+    [...enriched]
+      .reverse()
+      .find((entry) => entry.timestampValue <= threshold) ?? enriched[0];
+  const refPrice = priceUSD(reference.value ?? reference.price);
+  if (!latestPrice || !refPrice || !Number.isFinite(refPrice) || refPrice === 0) {
+    return null;
+  }
+  return refPrice;
+};
+
+const chunkArray = <T,>(array: T[], size: number): T[][] => {
+  const chunks: T[][] = [];
+  for (let i = 0; i < array.length; i += size) {
+    chunks.push(array.slice(i, i + size));
+  }
+  return chunks;
+};
+
 type NormalizedTeam = {
   id: string;
   name: string;
   abbreviation: string;
   price: number;
-  weekChangePercent?: number | null;
 };
 
 const normalizeTeams = (teams: TeamMarketInformation[]): NormalizedTeam[] => {
-  const grouped = new Map<
-    string,
-    Array<TeamMarketInformation & { timestampValue: number }>
-  >();
-
-  teams.forEach((team) => {
-    const list = grouped.get(team.team_name) ?? [];
-    list.push({
-      ...team,
-      timestampValue: team.timestamp ? new Date(team.timestamp).getTime() : -Infinity,
-    });
-    grouped.set(team.team_name, list);
-  });
-
-  const changeFrom = (
-    currentPrice: number,
-    reference?: (TeamMarketInformation & { timestampValue: number }) | null,
-  ) => {
-    if (!reference) return null;
-    const refPrice = priceUSD(reference.value ?? reference.price);
-    if (!refPrice) return null;
-    return ((currentPrice - refPrice) / refPrice) * 100;
-  };
-
-  const referenceFor = (
-    sorted: Array<TeamMarketInformation & { timestampValue: number }>,
-    windowMs: number,
-    latestTs: number,
-  ) => {
-    const threshold = latestTs - windowMs;
-    return (
-      [...sorted]
-        .reverse()
-        .find(
-          (entry) =>
-            entry.timestampValue <= threshold && entry.timestampValue !== -Infinity,
-        ) || sorted[0]
-    );
-  };
-
-  return Array.from(grouped.entries()).map(([name, entries], index) => {
-    const sorted = entries.sort((a, b) => a.timestampValue - b.timestampValue);
-    const latest = sorted[sorted.length - 1];
-    const latestTs = latest?.timestampValue ?? Date.now();
-    const weekRef = referenceFor(sorted, WEEK_MS, latestTs);
-    const price = priceUSD(latest?.value ?? latest?.price);
-
+  return teams.map((team, index) => {
+    const price = priceUSD(team.value ?? team.price);
     return {
-      id: `${name}-${latest?.timestamp ?? index}`,
-      name,
-      abbreviation: getTeamAbbreviation(name),
+      id: `${team.team_name}-${team.timestamp ?? index}`,
+      name: team.team_name,
+      abbreviation: getTeamAbbreviation(team.team_name),
       price,
-      weekChangePercent: changeFrom(price, weekRef),
     };
   });
 };
@@ -95,25 +87,75 @@ export default function Dashboard() {
   const { data: portfolioData, isLoading: isPortfolioLoading } = usePortfolio();
   const { data: portfolioHistory } = usePortfolioValueHistory();
   const navigateToMarket = useMarketNavigation();
+  const [referencePrices, setReferencePrices] = useState<Record<string, number>>({});
+  const pendingRefs = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!teams?.length) return;
+    const missing = teams
+      .map((team) => team.team_name)
+      .filter(
+        (name) => referencePrices[name] === undefined && !pendingRefs.current.has(name),
+      );
+    if (!missing.length) return;
+
+    let cancelled = false;
+
+    const fetchReferences = async () => {
+      for (const chunk of chunkArray(missing, 6)) {
+        chunk.forEach((name) => pendingRefs.current.add(name));
+        const results = await Promise.allSettled(
+          chunk.map((name) => fetchTeamHistory(name)),
+        );
+        if (cancelled) {
+          chunk.forEach((name) => pendingRefs.current.delete(name));
+          return;
+        }
+        const updates: Record<string, number> = {};
+        results.forEach((result, index) => {
+          const teamName = chunk[index];
+          pendingRefs.current.delete(teamName);
+          if (result.status === "fulfilled") {
+            const referencePrice = pickWeekReferencePrice(result.value);
+            if (referencePrice !== null) {
+              updates[teamName] = referencePrice;
+            }
+          }
+        });
+        if (Object.keys(updates).length) {
+          setReferencePrices((prev) => ({ ...prev, ...updates }));
+        }
+      }
+    };
+
+    fetchReferences();
+
+    return () => {
+      cancelled = true;
+      pendingRefs.current.clear();
+    };
+  }, [teams, referencePrices]);
 
   const normalizedTeams = useMemo(() => (teams ? normalizeTeams(teams) : []), [teams]);
 
   const trendingTeams = useMemo(() => {
     if (!normalizedTeams.length) return [];
     return normalizedTeams
-      .sort(
-        (a, b) =>
-          Math.abs(b.weekChangePercent ?? 0) - Math.abs(a.weekChangePercent ?? 0),
-      )
-      .slice(0, 5)
-      .map((team) => ({
-        id: team.id,
-        name: team.name,
-        abbreviation: team.abbreviation,
-        price: team.price,
-        changePercent: team.weekChangePercent ?? 0,
-      }));
-  }, [normalizedTeams]);
+      .map((team) => {
+        const refPrice = referencePrices[team.name];
+        const changePercent =
+          refPrice && refPrice !== 0 ? ((team.price - refPrice) / refPrice) * 100 : 0;
+        return {
+          id: team.id,
+          name: team.name,
+          abbreviation: team.abbreviation,
+          price: team.price,
+          changePercent,
+        };
+      })
+      .sort((a, b) => Math.abs(b.changePercent) - Math.abs(a.changePercent))
+      .slice(0, 5);
+  }, [normalizedTeams, referencePrices]);
 
   const quickTradeTeams = useMemo(
     () =>
@@ -129,7 +171,7 @@ export default function Dashboard() {
   const portfolioSnapshot = buildPortfolioSnapshot(
     portfolioData,
     teams,
-    portfolioHistory?.history,
+    portfolioHistory,
   );
 
   const portfolioInsights = useMemo(() => {
@@ -223,6 +265,8 @@ export default function Dashboard() {
                   dayChangePercent={portfolioSnapshot.dayChangePercent}
                   cashBalance={portfolioSnapshot.cashBalance}
                   holdingsCount={portfolioSnapshot.holdingsCount}
+                  totalPnL={portfolioSnapshot.totalUnrealizedPnL}
+                  initialDeposit={portfolioSnapshot.initialDeposit}
                 />
               )}
             </div>

@@ -249,6 +249,70 @@
     animation: flash-updated-time 0.9s ease;
   }
 
+  @keyframes flash-burst {
+    0% {
+      opacity: 0;
+    }
+    20% {
+      opacity: 0.85;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  .animate-screen-flash {
+    animation: flash-burst 0.9s ease-out forwards;
+  }
+
+  @keyframes bet-shake {
+    0% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-2px);
+    }
+    40% {
+      transform: translateX(2px);
+    }
+    60% {
+      transform: translateX(-2px);
+    }
+    80% {
+      transform: translateX(2px);
+    }
+    100% {
+      transform: translateX(0);
+    }
+  }
+
+  .animate-bet-shake {
+    animation: bet-shake 0.45s ease-in-out;
+  }
+
+  @keyframes bet-overlay {
+    0% {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+    20% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    80% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.04);
+    }
+  }
+
+  .bet-placed-overlay {
+    animation: bet-overlay 1.8s ease forwards;
+  }
+
   /* Hide ugly search cancel button in Chrome until we can style it properly */
   input[type="search"]::-webkit-search-cancel-button {
     @apply hidden;

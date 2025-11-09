@@ -22,12 +22,15 @@ export default function PortfolioStats({
   dayChange,
   dayChangePercent,
 }: PortfolioStatsProps) {
-  const safeTotalCost = totalCost > 0 ? totalCost : 0;
-  const safeCashBalance = cashBalance > 0 ? cashBalance : 0;
-  const safeInitialDeposit = initialDeposit > 0 ? initialDeposit : 0;
-  const totalProfitLoss = totalPnL;
+  const safeTotalCost = Number.isFinite(totalCost) && totalCost > 0 ? totalCost : 0;
+  const safeCashBalance =
+    Number.isFinite(cashBalance) && cashBalance > 0 ? cashBalance : 0;
+  const safeInitialDeposit =
+    Number.isFinite(initialDeposit) && initialDeposit !== 0 ? initialDeposit : 0;
+  const totalProfitLoss = Number.isFinite(totalPnL) ? totalPnL : 0;
   const totalProfitLossPercent =
-    totalValue > 0 ? (totalProfitLoss / totalValue) * 100 : 0;
+    safeInitialDeposit !== 0 ? (totalProfitLoss / safeInitialDeposit) * 100 : 0;
+  const normalizedDayChange = Number.isFinite(dayChange) ? dayChange : 0;
   const normalizedDayChangePercent = Number.isFinite(dayChangePercent)
     ? dayChangePercent
     : 0;
@@ -67,10 +70,10 @@ export default function PortfolioStats({
     {
       icon: Target,
       label: "Day Change",
-      value: `${dayChange >= 0 ? "+" : "-"}${formatCurrency(Math.abs(dayChange))}`,
-      valueRaw: dayChange,
+      value: `${normalizedDayChange >= 0 ? "+" : "-"}${formatCurrency(Math.abs(normalizedDayChange))}`,
+      valueRaw: normalizedDayChange,
       subtitle: `${normalizedDayChangePercent >= 0 ? "+" : "-"}${Math.abs(normalizedDayChangePercent).toFixed(2)}%`,
-      percentIntent: dayChange >= 0 ? "positive" : "negative",
+      percentIntent: normalizedDayChange >= 0 ? "positive" : "negative",
     },
   ] as const;
 

@@ -3,6 +3,8 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 
 const rootDir = import.meta.dirname;
+const liveStreamProxyTarget =
+  process.env.VITE_STREAM_PROXY_TARGET ?? "https://sunshine-laughable-unbriefly.ngrok-free.dev";
 
 export default defineConfig({
   root: rootDir,
@@ -21,6 +23,14 @@ export default defineConfig({
     fs: {
       strict: true,
       deny: ["**/.*"],
+    },
+    proxy: {
+      "/live-stream": {
+        target: liveStreamProxyTarget,
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/live-stream/, ""),
+      },
     },
   },
 });

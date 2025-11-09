@@ -12,6 +12,8 @@ interface PortfolioSummaryProps {
   dayChangePercent: number;
   cashBalance: number;
   holdingsCount: number;
+  totalPnL: number;
+  initialDeposit: number;
 }
 
 export default function PortfolioSummary({
@@ -20,12 +22,26 @@ export default function PortfolioSummary({
   dayChangePercent,
   cashBalance,
   holdingsCount,
+  totalPnL,
+  initialDeposit,
 }: PortfolioSummaryProps) {
-  const signedDayChange = `${dayChange >= 0 ? "+" : "-"}${formatCurrency(
-    Math.abs(dayChange),
+  const safeTotalValue = Number.isFinite(totalValue) ? totalValue : 0;
+  const safeInitialDeposit = Number.isFinite(initialDeposit) ? initialDeposit : 0;
+  const safeDayChange = Number.isFinite(dayChange) ? dayChange : 0;
+  const safeTotalPnL = Number.isFinite(totalPnL) ? totalPnL : safeTotalValue - safeInitialDeposit;
+  const safeDayChangePercent = Number.isFinite(dayChangePercent) ? dayChangePercent : 0;
+  const safeCashBalance = Number.isFinite(cashBalance) ? cashBalance : 0;
+  const safeHoldingsCount = Number.isFinite(holdingsCount) ? holdingsCount : 0;
+
+  const signedDayChange = `${safeDayChange >= 0 ? "+" : "-"}${formatCurrency(
+    Math.abs(safeDayChange),
   )}`;
-  const dayFlash = usePriceFlash(dayChange);
-  const percentFlash = usePriceFlash(dayChangePercent);
+  const signedTotalPnL = `${safeTotalPnL >= 0 ? "+" : "-"}${formatCurrency(
+    Math.abs(safeTotalPnL),
+  )}`;
+  const dayFlash = usePriceFlash(safeDayChange);
+  const pnlFlash = usePriceFlash(safeTotalPnL);
+  const percentFlash = usePriceFlash(safeDayChangePercent);
 
   return (
     <Card className="p-6" data-testid="portfolio-summary">
@@ -33,38 +49,43 @@ export default function PortfolioSummary({
         <div>
           <h2 className="text-lg font-semibold mb-4">Portfolio Summary</h2>
           <div className="flex items-end gap-3">
-            <PriceDisplay price={totalValue} size="lg" />
+            <PriceDisplay price={safeTotalValue} size="lg" />
             <span className={percentFlash}>
-              <PercentageChange value={dayChangePercent} size="md" />
+              <PercentageChange value={safeDayChangePercent} size="md" />
             </span>
           </div>
           <div
             className={`text-sm font-medium mt-2 ${
-              dayChange >= 0 ? "text-success" : "text-danger"
+              safeDayChange >= 0 ? "text-success" : "text-danger"
             } ${dayFlash}`}
           >
             {signedDayChange} today
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
             icon={Wallet}
             label="Cash Balance"
-            value={formatCurrency(cashBalance)}
-            flashValue={cashBalance}
+            value={formatCurrency(safeCashBalance)}
           />
           <StatCard
             icon={Briefcase}
             label="Holdings"
-            value={formatNumber(holdingsCount, { maximumFractionDigits: 0 })}
+            value={formatNumber(safeHoldingsCount, { maximumFractionDigits: 0 })}
             subtitle="Teams"
+          />
+          <StatCard
+            icon={TrendingUp}
+            label="Total P&L"
+            value={signedTotalPnL}
+            flashValue={safeTotalPnL}
           />
           <StatCard
             icon={TrendingUp}
             label="Day P&L"
             value={signedDayChange}
-            flashValue={dayChange}
+            flashValue={safeDayChange}
           />
         </div>
       </div>
