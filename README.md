@@ -8,10 +8,10 @@ NFLSE turns live football into a real-time stock market where fans buy and sell 
 ## ⚡ Overview
 Every NFL game becomes a living financial ecosystem:
 - 📈 Team values shift instantly with drives, scores, and turnovers  
-- 🤖 ML models forecast win probabilities and detect comebacks, allowing users to bet acccordingly
-- 🔗 Integrated **Kalshi API** provides real market data for volatility reference and price anchoring  
+- 🤖 ML models forecast win probabilities and detect comebacks, allowing users to place flash bets accordingly
+- 🔗 Integrated **Kalshi API** provides real market data for team "value" and playoff probability
 
-This created an **organic prediction market** — a self-regulating system where price movements stem from both user behavior and AI sentiment, mirroring the dynamics of real exchanges.
+Using the data from Kalshi, we designed a custom mean reversion algorithm to map consumer demand and determine an organic market equilibrium that continously updates every five seconds, reflecting current forces in the "NFL market"
 
 ---
 
@@ -40,5 +40,5 @@ Built during **AI ATL Hackathon 2025**
 
 ---
 
-**Created by Mehin Pandya**  
-🔗 [GitHub](https://github.com/mehinp/nfl-stock-exchange)
+**Live Demo**  
+🔗 [YouTube](https://www.youtube.com/watch?v=Ll3uQLXJ-0Q)
